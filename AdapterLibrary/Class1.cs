@@ -37,7 +37,7 @@ public class WebConfigurationState
 public class MonitorAPI
 {
 
-  public string monitorToWeb (string partConfigurationStateJSON) {
+  public string configurationToWeb (string partConfigurationStateJSON) {
 
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON);
 
@@ -52,7 +52,7 @@ public class MonitorAPI
     return json;
   }
 
-  public string webToMonitor () {
+  public string webToConfigurationInstructions () {
     return "";
   }
 }

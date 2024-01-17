@@ -1085,19 +1085,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\kriffe\\.nuget\\packages\\": {}
+    "C:\\Users\\KristoferSkyttner\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\Tests\\Tests.csproj",
+      "projectUniqueName": "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\Tests\\Tests.csproj",
       "projectName": "Tests",
-      "projectPath": "c:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\Tests\\Tests.csproj",
-      "packagesPath": "C:\\Users\\kriffe\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\Tests\\obj\\",
+      "projectPath": "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\Tests\\Tests.csproj",
+      "packagesPath": "C:\\Users\\KristoferSkyttner\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\Tests\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\kriffe\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\KristoferSkyttner\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -1109,8 +1109,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "c:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj": {
-              "projectPath": "c:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj"
+            "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj": {
+              "projectPath": "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj"
             }
           }
         }

@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\kriffe\\.nuget\\packages\\": {}
+    "C:\\Users\\KristoferSkyttner\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj",
+      "projectUniqueName": "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj",
       "projectName": "AdapterLibrary",
-      "projectPath": "C:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj",
-      "packagesPath": "C:\\Users\\kriffe\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kriffe\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\obj\\",
+      "projectPath": "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\AdapterLibrary.csproj",
+      "packagesPath": "C:\\Users\\KristoferSkyttner\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\KristoferSkyttner\\Documents\\GitHub\\skymaker-adapter-dynamaker-monitor\\AdapterLibrary\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\kriffe\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\KristoferSkyttner\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
