@@ -112,3 +112,4 @@ c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\Tests\obj\De
 c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\Tests\bin\Debug\net8.0\CoverletSourceRootsMapping_Tests
 c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\Tests\bin\Debug\net8.0\AdapterLibrary.dll
 c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\Tests\bin\Debug\net8.0\AdapterLibrary.pdb
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\Tests\obj\Debug\net8.0\Tests.sourcelink.json

@@ -23,13 +23,13 @@ public class  PartConfigurationState
   // "UnitPrice": null,
   // "UnitPriceInCompanyCurrency": null,
   // "WeightPerUnit": null,
-  public required string Sections;
+  public required string[] Sections;
 }
 
 public class WebConfigurationState
 {
-    public required string Variables { get; set; }
-    public required string SelectionGroups { get; set; }
+    public required string[] Variables { get; set; }
+    public required string[] SelectionGroups { get; set; }
     // public bool valid { get; set; }
 }
 
@@ -43,8 +43,8 @@ public class MonitorAPI
 
     var state = new WebConfigurationState
     {
-        SelectionGroups = "ABC",
-        Variables = "CDE",
+        SelectionGroups = ["ABC"],
+        Variables = ["CDE"],
     };
 
     string json = JsonSerializer.Serialize(state);
