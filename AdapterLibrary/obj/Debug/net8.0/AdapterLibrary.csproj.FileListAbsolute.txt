@@ -1,0 +1,11 @@
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\bin\Debug\net8.0\AdapterLibrary.deps.json
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\bin\Debug\net8.0\AdapterLibrary.dll
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\bin\Debug\net8.0\AdapterLibrary.pdb
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\AdapterLibrary.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\AdapterLibrary.AssemblyInfoInputs.cache
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\AdapterLibrary.AssemblyInfo.cs
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\AdapterLibrary.csproj.CoreCompileInputs.cache
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\AdapterLibrary.dll
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\refint\AdapterLibrary.dll
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\AdapterLibrary.pdb
+c:\Users\kriffe\Documents\GitHub\skymaker-adapter-dynamaker-monitor\AdapterLibrary\obj\Debug\net8.0\ref\AdapterLibrary.dll
