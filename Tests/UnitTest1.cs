@@ -7,9 +7,12 @@ public class UnitTest1
     [TestMethod]
     public void TestMethod1()
     {
-      AdapterLibrary.Class1 c = new AdapterLibrary.Class1();
-      string result = c.HelloWorld();
+      AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
+      string partStateApiResponse1 = @"{'Sections':[]'}";
 
-      Assert.AreEqual(result, "Hello World");
+      string result = adapter.monitorToWeb(partStateApiResponse1);
+
+      string partExpectedState1 = @"{'Variables':[]'}";
+      Assert.AreEqual(result, partExpectedState1);
     }
 }
