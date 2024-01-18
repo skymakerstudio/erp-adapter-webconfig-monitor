@@ -66,7 +66,7 @@ public record PartConfigurationState(
   
 );
 
-public record PartList (
+public record PartNumberMap (
   string Id,
   string PartNumber
 );
@@ -84,12 +84,13 @@ public class WebValidationResult
 
 }
 
-public record WebSelectionRowValue (
+public record WebSelectionRowItem (
 
-  string id,
-  string partId,
+  // string id,
+  // string partId,
+  string selection,
   // string partDescription,
-  string partNumber,
+  // string partNumber,
   int quantity
 
 
@@ -104,7 +105,7 @@ public record WebSelectionGroupState(
   string code,
   string description,
 
-  WebSelectionRowValue[] values
+  WebSelectionRowItem[] values
 );
 
 public record WebVariableState(
@@ -133,8 +134,18 @@ public record WebConfigurationState(
 
 
 
+
 public class MonitorAPI
 {
+
+  string getPartNumberFromId (string id, List<PartNumberMap> partNumberList) {
+    var partNumber = partNumberList.Find(item => item.Id == id);
+    if (partNumber != null) {
+      return partNumber.PartNumber;
+    } else {
+      throw new Exception();
+    }
+  }
 
   public string configurationToWeb (string partConfigurationStateJSON, string partNumberListJSON) {
 
@@ -142,11 +153,11 @@ public class MonitorAPI
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    PartList[]? partIdList = JsonSerializer.Deserialize<PartList[]>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
+    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
     var variables = new Dictionary<string, double>();
     // var texts = new Dictionary<string, string>();
-    var selectionGroups = new Dictionary<string, List<WebSelectionRowValue>>();
+    var selectionGroups = new Dictionary<string, List<WebSelectionRowItem>>();
         // {
         //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
         // };
@@ -171,13 +182,13 @@ public class MonitorAPI
           for (int j = 0; j < section.SelectionGroups.Length; j++) {
             var selGroup = section.SelectionGroups[j];
             if (selGroup != null) {
-              List<WebSelectionRowValue> selectedRows = new List<WebSelectionRowValue>();
+              List<WebSelectionRowItem> selectedRows = new List<WebSelectionRowItem>();
               
               for (int k = 0; k < selGroup.Rows.Length; k++) {
                 var row = selGroup.Rows[k];
                 if (row.IsSelected) {
-                  var rowPartNumber = "123"; // get from partNumberListJSON
-                  var webValue = new WebSelectionRowValue(row.Id, row.PartId, rowPartNumber, row.Quantity);
+                  var rowPartNumber = getPartNumberFromId(row.PartId, partIdList ?? ([]));
+                  var webValue = new WebSelectionRowItem(rowPartNumber, row.Quantity);
                   selectedRows.Add(webValue);
                 }
               }
@@ -191,12 +202,13 @@ public class MonitorAPI
       }
     }
 
-    var partNumber = "M-240"; // fetch from list of part number map
+    var partId = (partConfigurationState != null) ? partConfigurationState.PartId : "";
+    var partNumber = getPartNumberFromId(partId, partIdList ?? ([]));
 
     var state = new 
     {
-        partId = (partConfigurationState != null) ? partConfigurationState.PartId : "",
-        partNumber = partNumber,
+        partId,
+        partNumber,
         // partConfigurationId = "",
         // configurationSessionId = "",
         // quantity = 1,

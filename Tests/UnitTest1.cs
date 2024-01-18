@@ -1,5 +1,6 @@
 namespace Tests;
 using System.Text.Json;
+using AdapterLibrary;
 
 [TestClass]
 public class UnitTest1
@@ -29,8 +30,8 @@ public class UnitTest1
           ["Perforation"] = 0.16,
           ["nHoles"] = 64,
         },
-        selectionGroups = new Dictionary<string, string[]>(){
-          ["M240-1"] = ["M-240-1"],
+        selectionGroups = new Dictionary<string, WebSelectionRowItem[]>(){
+          ["M240-1"] = [new WebSelectionRowItem("M-240-1", 1)]
         }
       };
       var expectedResult = JsonSerializer.Serialize(partExpectedState1);
