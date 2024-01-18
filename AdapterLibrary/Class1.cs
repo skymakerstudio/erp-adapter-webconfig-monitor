@@ -1,4 +1,6 @@
 ﻿namespace AdapterLibrary;
+
+using System.Numerics;
 using System.Text.Json;
 
 public class  PartConfigurationState
@@ -26,11 +28,64 @@ public class  PartConfigurationState
   public required string[] Sections;
 }
 
+public class WebValidationResult
+ {
+
+  public required string Id;
+
+  public required string Description;
+
+  public required string[] ErrorMessages;
+
+}
+
+public class WebSelectionRowValue {
+
+  public required string id;
+  public required string partDescription;
+  public required string partId;
+
+  public required string partNumber;
+
+  public required int quantity;
+
+  public required WebValidationResult[] validationResults;
+
+}
+
+public class WebSelectionGroupState
+{
+
+  public required string id;
+  public required string code;
+  public required string description;
+
+  public required WebSelectionRowValue[] values;
+
+}
+
+public class WebVariableState
+{
+  public required string id;
+  public required string code;
+  public required string description;
+
+  public required string value;
+
+  public required WebValidationResult[] validationResults;
+}
+
 public class WebConfigurationState
 {
-    public required string[] Variables { get; set; }
-    public required string[] SelectionGroups { get; set; }
-    // public bool valid { get; set; }
+    public required string partNumber;
+    public required string partId;
+
+    public required string partConfigurationId;
+    public required string configurationSessionId;
+    public required string quantity;
+
+    public required Dictionary<string, WebVariableState>[] Variables;
+    public required Dictionary<string, WebSelectionGroupState>[] SelectionGroups;
 }
 
 
@@ -41,8 +96,12 @@ public class MonitorAPI
 
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON);
 
+    var partNumber = "123";
+
     var state = new WebConfigurationState
     {
+        partId = partConfigurationState.PartId,
+        partNumber = partNumber,
         SelectionGroups = ["ABC"],
         Variables = ["CDE"],
     };
