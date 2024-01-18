@@ -78,18 +78,18 @@ public class WebVariableState
   public required WebValidationResult[] validationResults;
 }
 
-public class WebConfigurationState
-{
-    public required string partNumber;
-    public required string partId;
+public record WebConfigurationState(
 
-    public required string partConfigurationId;
-    public required string configurationSessionId;
-    public required int quantity;
+    string partNumber,
+    string partId
 
-    public required Dictionary<string, WebVariableState>[] Variables;
-    public required Dictionary<string, WebSelectionGroupState>[] SelectionGroups;
-}
+    // public required string partConfigurationId;
+    // public required string configurationSessionId;
+    // public required int quantity;
+
+    // public required Dictionary<string, WebVariableState>[] Variables;
+    // public required Dictionary<string, WebSelectionGroupState>[] SelectionGroups;
+);
 
 
 
@@ -103,20 +103,18 @@ public class MonitorAPI
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    var partId = (partConfigurationState != null) ? partConfigurationState.PartId : "";
-
 
     var partNumber = "123"; // fetch from list of part number map
 
-    var state = new WebConfigurationState
+    var state = new 
     {
         partId = (partConfigurationState != null) ? partConfigurationState.PartId : "",
         partNumber = partNumber,
         partConfigurationId = "",
         configurationSessionId = "",
         quantity = 1,
-        SelectionGroups = [],
-        Variables = [],
+        // SelectionGroups = [],
+        // Variables = [],
     };
 
     string json = JsonSerializer.Serialize(state);
