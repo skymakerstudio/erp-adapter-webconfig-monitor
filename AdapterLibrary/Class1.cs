@@ -82,7 +82,7 @@ public class WebConfigurationState
 
     public required string partConfigurationId;
     public required string configurationSessionId;
-    public required string quantity;
+    public required int quantity;
 
     public required Dictionary<string, WebVariableState>[] Variables;
     public required Dictionary<string, WebSelectionGroupState>[] SelectionGroups;
@@ -100,10 +100,13 @@ public class MonitorAPI
 
     var state = new WebConfigurationState
     {
-        partId = partConfigurationState.PartId,
+        partId = "123",
         partNumber = partNumber,
-        SelectionGroups = ["ABC"],
-        Variables = ["CDE"],
+        partConfigurationId = "",
+        configurationSessionId = "",
+        quantity = 1,
+        SelectionGroups = [],
+        Variables = [],
     };
 
     string json = JsonSerializer.Serialize(state);
