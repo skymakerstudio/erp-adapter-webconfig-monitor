@@ -2,10 +2,12 @@
 
 using System.Numerics;
 using System.Text.Json;
+using System;
+using System.Collections.Generic;
 
-public class  PartConfigurationState
-{
-  // public required string SessionId { get; set; }
+public record PartConfigurationState(
+  string SessionId,
+  bool IsValid
   // "ExpiresAt": "0001-01-01T00:00:00+00:00",
   // "CustomerId": 0,
   // "Comment": null,
@@ -13,20 +15,19 @@ public class  PartConfigurationState
   // "PartConfigurationTemplateId": 0,
   // "PartConfigurationTemplateVersion": 0,
   // "PartConfigurationId": 0,
-  // "IsValid": false,
   // "AlternativePreparationCode": null,
   // "DiscountPercentage": 0.0,
   // "LockedDiscount": false,
   // "LockedUnitPrice": false,
-  // "PartId": 0,
+  // public required string PartId;
   // "PriceFormulaFactor": 0.0,
-  // "Quantity": 0.0,
+  // public required int Quantity;
   // "StandardPrice": null,
   // "UnitPrice": null,
   // "UnitPriceInCompanyCurrency": null,
   // "WeightPerUnit": null,
-  public required string[] Sections;
-}
+  // string[] Sections
+);
 
 public class WebValidationResult
  {
@@ -89,12 +90,18 @@ public class WebConfigurationState
 }
 
 
+
+
 public class MonitorAPI
 {
 
   public string configurationToWeb (string partConfigurationStateJSON) {
 
-    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON);
+    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
+      new JsonSerializerOptions(JsonSerializerDefaults.General)
+    );
+
+    
 
     var partNumber = "123";
 
