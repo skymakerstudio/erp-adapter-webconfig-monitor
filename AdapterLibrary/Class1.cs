@@ -7,7 +7,10 @@ using System.Collections.Generic;
 
 public record PartConfigurationState(
   string SessionId,
-  bool IsValid
+  bool IsValid,
+  string PartId,
+  int Quantity
+  // string[] Sections
   // "ExpiresAt": "0001-01-01T00:00:00+00:00",
   // "CustomerId": 0,
   // "Comment": null,
@@ -19,14 +22,13 @@ public record PartConfigurationState(
   // "DiscountPercentage": 0.0,
   // "LockedDiscount": false,
   // "LockedUnitPrice": false,
-  // public required string PartId;
   // "PriceFormulaFactor": 0.0,
-  // public required int Quantity;
+  
   // "StandardPrice": null,
   // "UnitPrice": null,
   // "UnitPriceInCompanyCurrency": null,
   // "WeightPerUnit": null,
-  // string[] Sections
+  
 );
 
 public class WebValidationResult
@@ -101,13 +103,14 @@ public class MonitorAPI
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    
+    var partId = (partConfigurationState != null) ? partConfigurationState.PartId : "";
 
-    var partNumber = "123";
+
+    var partNumber = "123"; // fetch from list of part number map
 
     var state = new WebConfigurationState
     {
-        partId = "123",
+        partId = (partConfigurationState != null) ? partConfigurationState.PartId : "",
         partNumber = partNumber,
         partConfigurationId = "",
         configurationSessionId = "",
