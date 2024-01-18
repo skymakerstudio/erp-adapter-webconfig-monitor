@@ -4,13 +4,36 @@ using System.Numerics;
 using System.Text.Json;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization.Metadata;
+using System.Runtime.Versioning;
+
+public record VariableValue( 
+  int Type, // String: 0, Numeric: 1, Boolean: 2, Date: 3
+  string StringValue,
+  bool BooleanValue,
+  decimal NumericValue,
+  DateTime? DateTimeValue
+);
+
+public record VariableState(
+  string Id,
+  string Name,
+  int VariableType, // String: 0, Numeric: 1, Boolean: 2, Date: 3
+  VariableValue Value
+);
+
+public record SectionState (
+  string Id,
+  VariableState[] Variables
+
+);
 
 public record PartConfigurationState(
   string SessionId,
   bool IsValid,
   string PartId,
-  int Quantity
-  // string[] Sections
+  int Quantity,
+  SectionState[] Sections
   // "ExpiresAt": "0001-01-01T00:00:00+00:00",
   // "CustomerId": 0,
   // "Comment": null,
@@ -30,6 +53,8 @@ public record PartConfigurationState(
   // "WeightPerUnit": null,
   
 );
+
+
 
 public class WebValidationResult
  {
@@ -67,22 +92,21 @@ public class WebSelectionGroupState
 
 }
 
-public class WebVariableState
-{
-  public required string id;
-  public required string code;
-  public required string description;
+public record WebVariableState(
+  string id, 
+  string name,
+  // public required string description;
 
-  public required string value;
+  decimal value
 
-  public required WebValidationResult[] validationResults;
-}
+  // public required WebValidationResult[] validationResults;
+);
 
 public record WebConfigurationState(
 
     string partNumber,
-    string partId
-
+    string partId,
+    Dictionary<string, decimal>[] variables
     // public required string partConfigurationId;
     // public required string configurationSessionId;
     // public required int quantity;
@@ -103,16 +127,40 @@ public class MonitorAPI
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
+    var variables = new Dictionary<string, decimal>();
+        // {
+        //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
+        // };
+    if (partConfigurationState != null) {
+      for (int i = 0; i < partConfigurationState.Sections.Length; i++) 
+      {
 
-    var partNumber = "123"; // fetch from list of part number map
+        var section = partConfigurationState.Sections[i];
+        if (section != null) {
+          for (int j = 0; j < section.Variables.Length; j++) {
+            var sectionVariable = section.Variables[j];
+            if (sectionVariable != null) {
+              if ((sectionVariable.VariableType == 1) & (sectionVariable.Value.Type == 1)) {
+                // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
+                variables.Add(sectionVariable.Name, sectionVariable.Value.NumericValue);
+              } else {
+              }
+            }
+          }
+        }
+      }
+    }
+
+    var partNumber = "M-240"; // fetch from list of part number map
 
     var state = new 
     {
         partId = (partConfigurationState != null) ? partConfigurationState.PartId : "",
         partNumber = partNumber,
-        partConfigurationId = "",
-        configurationSessionId = "",
-        quantity = 1,
+        // partConfigurationId = "",
+        // configurationSessionId = "",
+        // quantity = 1,
+        variables,
         // SelectionGroups = [],
         // Variables = [],
     };

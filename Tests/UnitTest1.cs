@@ -15,7 +15,22 @@ public class UnitTest1
 
       string result = adapter.configurationToWeb(M240_PartConfigurationState);
 
-      string partExpectedState1 = "{\"Variables\":[]}";
-      Assert.AreEqual(result, partExpectedState1);
+      // string partExpectedState1 = "{\"partId\":\"707433796463833993\",\"partNumber\":\"M-240\",\"variables\":{\"Width\":{\"id\":\"707434600696463128\",\"name\":\"Width\",\"value\":100}}}";
+      var partExpectedState1 = new 
+      {
+        partId = "707433796463833993",
+        partNumber = "M-240",
+        variables = new {
+          Width = 100,
+          Depth = 100,
+          HoleSize = 5,
+          HoleSpacing = 1,
+          Area = 0.01,
+          Perforation = 0.16,
+          nHoles = 64,
+        }
+      };
+      var expectedResult = JsonSerializer.Serialize(partExpectedState1);
+      Assert.AreEqual(result, expectedResult);
     }
 }
