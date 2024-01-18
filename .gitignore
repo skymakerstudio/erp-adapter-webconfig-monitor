@@ -1,7 +1,8 @@
 # Files built by Visual Studio
 
-/AdapterLibrary/bin/*
-/AdapterLibrary/obj/*
+AdapterLibrary/bin/Debug/**/**
+AdapterLibrary/obj/Debug/**/**
 
-/Test/bin/*
-/Test/obj/*
+Test/bin/Debug/**/**
+Test/obj/Debug/**/**
+
