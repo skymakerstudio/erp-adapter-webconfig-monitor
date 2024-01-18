@@ -11,7 +11,7 @@ public record VariableValue(
   int Type, // String: 0, Numeric: 1, Boolean: 2, Date: 3
   string StringValue,
   bool BooleanValue,
-  decimal NumericValue,
+  double NumericValue,
   DateTime? DateTimeValue
 );
 
@@ -22,9 +22,21 @@ public record VariableState(
   VariableValue Value
 );
 
+public record SelectionGroupRowState(
+  string Id,
+  string PartId,
+  bool IsSelected,
+  int Quantity
+);
+public record SelectionGroupState(
+  string Code,
+  SelectionGroupRowState[] Rows
+);
+
 public record SectionState (
   string Id,
-  VariableState[] Variables
+  VariableState[] Variables,
+  SelectionGroupState[] SelectionGroups
 
 );
 
@@ -54,6 +66,11 @@ public record PartConfigurationState(
   
 );
 
+public record PartList (
+  string Id,
+  string PartNumber
+);
+
 
 
 public class WebValidationResult
@@ -67,37 +84,35 @@ public class WebValidationResult
 
 }
 
-public class WebSelectionRowValue {
+public record WebSelectionRowValue (
 
-  public required string id;
-  public required string partDescription;
-  public required string partId;
+  string id,
+  string partId,
+  // string partDescription,
+  string partNumber,
+  int quantity
 
-  public required string partNumber;
 
-  public required int quantity;
 
-  public required WebValidationResult[] validationResults;
+  // public required WebValidationResult[] validationResults;
 
-}
+);
 
-public class WebSelectionGroupState
-{
+public record WebSelectionGroupState(
 
-  public required string id;
-  public required string code;
-  public required string description;
+  string id,
+  string code,
+  string description,
 
-  public required WebSelectionRowValue[] values;
-
-}
+  WebSelectionRowValue[] values
+);
 
 public record WebVariableState(
   string id, 
   string name,
   // public required string description;
 
-  decimal value
+  double value
 
   // public required WebValidationResult[] validationResults;
 );
@@ -106,7 +121,7 @@ public record WebConfigurationState(
 
     string partNumber,
     string partId,
-    Dictionary<string, decimal>[] variables
+    Dictionary<string, double>[] variables
     // public required string partConfigurationId;
     // public required string configurationSessionId;
     // public required int quantity;
@@ -121,13 +136,17 @@ public record WebConfigurationState(
 public class MonitorAPI
 {
 
-  public string configurationToWeb (string partConfigurationStateJSON) {
+  public string configurationToWeb (string partConfigurationStateJSON, string partNumberListJSON) {
 
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    var variables = new Dictionary<string, decimal>();
+    PartList[]? partIdList = JsonSerializer.Deserialize<PartList[]>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
+
+    var variables = new Dictionary<string, double>();
+    // var texts = new Dictionary<string, string>();
+    var selectionGroups = new Dictionary<string, List<WebSelectionRowValue>>();
         // {
         //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
         // };
@@ -138,13 +157,34 @@ public class MonitorAPI
         var section = partConfigurationState.Sections[i];
         if (section != null) {
           for (int j = 0; j < section.Variables.Length; j++) {
-            var sectionVariable = section.Variables[j];
-            if (sectionVariable != null) {
-              if ((sectionVariable.VariableType == 1) & (sectionVariable.Value.Type == 1)) {
+            var secVariable = section.Variables[j];
+            if (secVariable != null) {
+              if ((secVariable.VariableType == 1) & (secVariable.Value.Type == 1)) {
                 // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
-                variables.Add(sectionVariable.Name, sectionVariable.Value.NumericValue);
+                variables.Add(secVariable.Name, secVariable.Value.NumericValue);
               } else {
+                // todo: Add String to texts and Date to dates
               }
+            }
+          }
+
+          for (int j = 0; j < section.SelectionGroups.Length; j++) {
+            var selGroup = section.SelectionGroups[j];
+            if (selGroup != null) {
+              List<WebSelectionRowValue> selectedRows = new List<WebSelectionRowValue>();
+              
+              for (int k = 0; k < selGroup.Rows.Length; k++) {
+                var row = selGroup.Rows[k];
+                if (row.IsSelected) {
+                  var rowPartNumber = "123"; // get from partNumberListJSON
+                  var webValue = new WebSelectionRowValue(row.Id, row.PartId, rowPartNumber, row.Quantity);
+                  selectedRows.Add(webValue);
+                }
+              }
+
+              selectionGroups.Add(selGroup.Code, selectedRows);
+                // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
+              
             }
           }
         }
@@ -161,7 +201,7 @@ public class MonitorAPI
         // configurationSessionId = "",
         // quantity = 1,
         variables,
-        // SelectionGroups = [],
+        selectionGroups,
         // Variables = [],
     };
 
