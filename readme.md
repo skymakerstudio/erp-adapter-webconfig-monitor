@@ -1,4 +1,4 @@
-# Monitor G5 PartConfigration web adapter
+# Monitor G5 Web adapter for PartConfigration
 Library for making complex configuration structures in ERP Monitor G5 easy to work with in a web context
 
 Library also eliminate dependency for internal guid references that changes in Monitor G5
@@ -55,7 +55,6 @@ string resultAsJsonString = adapter.configurationToWeb(partConfigState, partNumb
                     "DateTimeValue": null
                 }
             },
-            "SelectionGroupRow": null
         },
         {
             "Type": 0,
@@ -106,7 +105,7 @@ string partConfigState = postRequestTo(apiUrl + "/Common/PartConfigurations/Upda
 ## FAQ
 
 ### Why is a list of all partNumbers needed?
-additional partNumbers argument is required until PartConfigurationState rows contain the PartNumber information (feature request for expandable PartConfigurationState)
+additional partNumbers argument is required until PartConfigurationState rows contain the PartNumber information (if one day SelectionGroupRow can be expanded direct in PartConfigurationState with PartNumber this can be removed)
 
 ### Why cant we use the entire PartConfigurationState direct?
 PartConfigurationState contains too much information, and not all should be possible to modify on the web client side
