@@ -101,6 +101,20 @@ string partConfigState = postRequestTo(apiUrl + "/Common/PartConfigurations/Upda
 
 ```
 
+## How to use
+
+Include the AdapterLibrary in your project
+
+## How to test - VSCODE
+
+MSTests defined in Test folder
+
+Install C# Devkit and run the Testing -> Run "Debug Tests" tab. Or in terminal:
+
+```sh
+dotnet test
+```
+
 
 ## FAQ
 
