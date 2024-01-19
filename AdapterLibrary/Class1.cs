@@ -105,18 +105,8 @@ public class WebValidationResult
 }
 
 public record WebSelectionRowItem (
-
-  // string id,
-  // string partId,
   string selection,
-  // string partDescription,
-  // string partNumber,
   int quantity
-
-
-
-  // public required WebValidationResult[] validationResults;
-
 );
 
 public record WebSelectionGroupState(
@@ -141,8 +131,8 @@ public record WebConfigurationState(
     string partNumber,
     Dictionary<string, double> values,
     Dictionary<string, string> texts,
-    Dictionary<string, bool> booleans
-    // Dictionary<string, WebSelectionRowItem> selections
+    Dictionary<string, bool> booleans,
+    Dictionary<string, WebSelectionRowItem[]> selections
 
 
     // public required string partConfigurationId;
@@ -158,14 +148,14 @@ public record WebConfigurationIdMap (
   Dictionary<string, string> texts,
   Dictionary<string, string> booleans,
   Dictionary<string, string> selectionGroups,
-  Dictionary<string, string> selectionRows
+  Dictionary<string, string> selectionRows,
+  Dictionary<string, List<string>> selectionGroupRowIds
 );
 
 public class MonitorAPI
 {
 
-  // todo: replace with map
-  string getPartNumberFromPartId (string id, List<PartNumberMap>? partNumberList) {
+  private static string getPartNumberFromPartId (string id, List<PartNumberMap>? partNumberList) {
     var partNumber = (partNumberList ?? []).Find(item => item.Id == id);
     if (partNumber != null) {
       return partNumber.PartNumber;
@@ -174,7 +164,7 @@ public class MonitorAPI
     }
   }
 
-  List<VariableState> getAllVariablesFromSections (SectionState[] sections) {
+  private static List<VariableState> getAllVariablesFromSections (SectionState[] sections) {
     List<VariableState> variables = new List<VariableState>();
     for (int i = 0; i < sections.Length; i++) {
       var section = sections[i];
@@ -188,7 +178,7 @@ public class MonitorAPI
     return variables;
   }
 
-  List<SelectionGroupState> getAllSelectionGroupsFromSections (SectionState[] sections) {
+  private static List<SelectionGroupState> getAllSelectionGroupsFromSections (SectionState[] sections) {
     List<SelectionGroupState> selectionGroups = new List<SelectionGroupState>();
     for (int i = 0; i < sections.Length; i++) {
       var section = sections[i];
@@ -202,8 +192,7 @@ public class MonitorAPI
     return selectionGroups;
   }
 
-  // todo: Rename to generateIdMaps and complement with getPartIdToPartMap
-  public WebConfigurationIdMap generateCodeToIdMap (string partConfigurationStateJSON, string partNumberListJSON) { 
+  public WebConfigurationIdMap generateCodeToIdMaps (string partConfigurationStateJSON, string partNumberListJSON) { 
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
@@ -215,6 +204,7 @@ public class MonitorAPI
     Dictionary<string, string> booleanNameToId = new Dictionary<string, string>();
     Dictionary<string, string> selectionGroupCodeToId = new Dictionary<string, string>();
     Dictionary<string, string> selectionRowPartNumberToId = new Dictionary<string, string>();
+    Dictionary<string, List<string>> selectionGroupRowIds = new Dictionary<string, List<string>>();
 
     var sections = partConfigurationState?.Sections ?? [];
     var variablesInSections = getAllVariablesFromSections(sections);
@@ -236,11 +226,14 @@ public class MonitorAPI
     for (int i = 0; i<selectionGroupsInSections.Count; i++) {
       var currSection = selectionGroupsInSections[i];
       selectionGroupCodeToId.Add(currSection.Code, currSection.Id);
+      List<string> rowIdList = new List<string>();
       for (int j = 0; j<currSection.Rows.Length; j++) {
         var row = currSection.Rows[j];
         var partNumber = getPartNumberFromPartId(row.PartId, partIdList);
         selectionRowPartNumberToId.Add(partNumber, row.Id);
+        rowIdList.Add(row.Id);
       }
+      selectionGroupRowIds.Add(currSection.Code, rowIdList);
     }
 
     var map = new WebConfigurationIdMap(
@@ -248,7 +241,8 @@ public class MonitorAPI
       textNameToId,
       booleanNameToId,
       selectionGroupCodeToId,
-      selectionRowPartNumberToId
+      selectionRowPartNumberToId,
+      selectionGroupRowIds
     );
     return map;
   }
@@ -336,7 +330,7 @@ public class MonitorAPI
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    var mapPartNumberToId = generateCodeToIdMap(partConfigurationStateJSON, partNumberListJSON);
+    var mapCodeToId = generateCodeToIdMaps(partConfigurationStateJSON, partNumberListJSON);
 
     var instructions = new List<UpdatePartConfigurationInstruction>();
 
@@ -344,7 +338,7 @@ public class MonitorAPI
       if (webConfigState.values != null) {
         foreach (string key in webConfigState.values.Keys) { 
             var numericValue = webConfigState.values[key];
-            string variableId = mapPartNumberToId.values.ContainsKey(key) ? (mapPartNumberToId.values[key] ?? "") : "";
+            string variableId = mapCodeToId.values.ContainsKey(key) ? (mapCodeToId.values[key] ?? "") : "";
             instructions.Add(
               new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(1, null, null, numericValue, null)), null)
             );
@@ -353,7 +347,7 @@ public class MonitorAPI
       if (webConfigState.texts != null) {
         foreach (string key in webConfigState.texts.Keys) { 
             var textValue = webConfigState.texts[key];
-            string variableId = mapPartNumberToId.texts.ContainsKey(key) ? (mapPartNumberToId.texts[key] ?? "") : "";
+            string variableId = mapCodeToId.texts.ContainsKey(key) ? (mapCodeToId.texts[key] ?? "") : "";
             instructions.Add(
               new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(0, textValue, null, null, null)), null)
             );
@@ -362,14 +356,44 @@ public class MonitorAPI
       if (webConfigState.booleans != null) {
         foreach (string key in webConfigState.booleans.Keys) { 
             var booleanValue = webConfigState.booleans[key];
-            string variableId = mapPartNumberToId.booleans.ContainsKey(key) ? (mapPartNumberToId.booleans[key] ?? "") : "";
+            string variableId = mapCodeToId.booleans.ContainsKey(key) ? (mapCodeToId.booleans[key] ?? "") : "";
             instructions.Add(
               new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(0, null, booleanValue, null, null)), null)
             );
         }
       }
-    }
+      if (webConfigState.selections != null) {
+        foreach (string key in webConfigState.selections.Keys) { 
+            WebSelectionRowItem[] rowSelections = webConfigState.selections[key] ?? [];
+            string selectionId = mapCodeToId.selectionGroups.ContainsKey(key) ? (mapCodeToId.selectionGroups[key] ?? "") : "";
+          
+            var allRows = mapCodeToId.selectionGroupRowIds[key];
+            
+            List<SelectionGroupRowUpdate> rowUnselectInstructions = new List<SelectionGroupRowUpdate>();
 
+            // First - Add instruction to unselect all rows first
+            for (int i = 0; i<allRows.Count; i++) {
+              string rowId = allRows[i];
+              rowUnselectInstructions.Add(new SelectionGroupRowUpdate(rowId, false, null)); 
+            }
+
+            // Secondly - change rows that exist in web selection
+            List<SelectionGroupRowUpdate> rowUpdateInstructions = new List<SelectionGroupRowUpdate>();
+            foreach (SelectionGroupRowUpdate rowUpdateInstruction in rowUnselectInstructions) {
+              var rowToSelect = Array.Find(rowSelections, item => {
+                var selectedRowId = mapCodeToId.selectionRows[item.selection];
+                return selectedRowId == rowUpdateInstruction.SelectionGroupRowId;
+              });
+              var rowInstruction = rowUpdateInstruction;
+              if (rowToSelect != null) {
+                rowInstruction = new SelectionGroupRowUpdate(rowUpdateInstruction.SelectionGroupRowId, true, rowToSelect.quantity);
+              }
+              instructions.Add(new UpdatePartConfigurationInstruction(1, null, rowInstruction));
+            }
+        }
+      }
+    }
+    
     var configurationUpdate = new { SessionId = sessionId, Instructions = instructions };
     string json = JsonSerializer.Serialize(configurationUpdate);
     return json;

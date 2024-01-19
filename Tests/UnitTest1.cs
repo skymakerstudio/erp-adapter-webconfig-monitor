@@ -61,7 +61,7 @@ public class UnitTest1
           ["Depth"] = 100,
         },
         selections = new Dictionary<string, WebSelectionRowItem[]>(){
-          ["M240-1"] = [new WebSelectionRowItem("M-240-0", 1)]
+          ["M240-1"] = [new WebSelectionRowItem("M-240-2", 1)]
         }
       };
       var jsonInputString = JsonSerializer.Serialize(configWebState);
@@ -91,7 +91,12 @@ public class UnitTest1
            new UpdatePartConfigurationInstruction(
             1, 
             null,
-            new SelectionGroupRowUpdate("993518285080342908", true, null)
+            new SelectionGroupRowUpdate("993518285080342908", false, null)
+          ),
+           new UpdatePartConfigurationInstruction(
+            1, 
+            null,
+            new SelectionGroupRowUpdate("993518285080342909", true, 1)
           ),
         }
         
