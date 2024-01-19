@@ -31,7 +31,11 @@ public record SelectionGroupRowState(
   string PartId,
   bool IsSelected,
   int Quantity
-);
+)
+{
+  public string? PartNumber { get; set; } // Not part of standard response
+  public string? Description { get; set; } // Not part of standard response
+};
 
 public record SectionState (
   string Id,
@@ -115,10 +119,10 @@ public record WebConfigurationState(
 public class MonitorAPI
 {
 
-  private static string getPartNumberFromPartId (string id, List<PartNumberMap>? partNumberList) {
-    var partNumber = (partNumberList ?? []).Find(item => item.Id == id);
-    if (partNumber != null) {
-      return partNumber.PartNumber;
+  private static PartNumberMap getPartFromPartId (string partId, List<PartNumberMap>? partNumberList) {
+    var partDef = (partNumberList ?? []).Find(item => item.Id == partId);
+    if (partDef != null) {
+      return partDef;
     } else {
       throw new Exception();
     }
@@ -168,6 +172,29 @@ public class MonitorAPI
     return selectionGroups;
   }
 
+  // Currently StateSelectionRow is missing the PartNumber and Description which has to be added
+  private static void appendMissingDataToPartConfigurationStateSection (SectionState[] sections, List<PartNumberMap> partIdList) {
+    
+    for (int i = 0; i < sections.Length; i++) {
+      var section = sections[i];
+      // section.Variables
+      for (int j = 0; j < section.SelectionGroups.Length; j++) {
+        var group = section.SelectionGroups[j];
+        foreach (SelectionGroupRowState row in group.Rows) {
+          var part = getPartFromPartId(row.PartId, partIdList);
+          row.PartNumber = part.PartNumber;
+          row.Description = part.Description;
+        }
+      }
+
+      // Recursive append of missing sub sections content
+      if (section.Sections.Length > 0) {
+        appendMissingDataToPartConfigurationStateSection(section.Sections, partIdList);
+      }
+      
+    }
+  }
+
   public WebConfigurationIdMap generateCodeToIdMaps (string partConfigurationStateJSON, string partNumberListJSON) { 
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
       new JsonSerializerOptions(JsonSerializerDefaults.General)
@@ -205,7 +232,7 @@ public class MonitorAPI
       List<string> rowIdList = new List<string>();
       for (int j = 0; j<currSection.Rows.Length; j++) {
         var row = currSection.Rows[j];
-        var partNumber = getPartNumberFromPartId(row.PartId, partIdList);
+        var partNumber = getPartFromPartId(row.PartId, partIdList).PartNumber;
         selectionRowPartNumberToId.Add(partNumber, row.Id);
         rowIdList.Add(row.Id);
       }
@@ -265,7 +292,7 @@ public class MonitorAPI
               for (int k = 0; k < selGroup.Rows.Length; k++) {
                 var row = selGroup.Rows[k];
                 if (row.IsSelected) {
-                  var rowPartNumber = getPartNumberFromPartId(row.PartId, partIdList ?? ([]));
+                  var rowPartNumber = getPartFromPartId(row.PartId, partIdList ?? ([])).PartNumber;
                   var webValue = new WebSelectionRowItem(rowPartNumber, row.Quantity);
                   selectedRows.Add(webValue);
                 }
@@ -281,7 +308,7 @@ public class MonitorAPI
     }
 
     var partId = (partConfigurationState != null) ? partConfigurationState.PartId : "";
-    var partNumber = getPartNumberFromPartId(partId, partIdList ?? ([]));
+    var partNumber = getPartFromPartId(partId, partIdList ?? ([])).PartNumber;
 
     bool valid = (partConfigurationState != null) ? partConfigurationState.IsValid : false;
 
@@ -372,6 +399,23 @@ public class MonitorAPI
     
     var configurationUpdate = new { SessionId = sessionId, Instructions = instructions };
     string json = JsonSerializer.Serialize(configurationUpdate);
+    return json;
+  }
+
+  public string getConfiguratorDefinition (string partConfigurationStateJSON, string partNumberListJSON) {
+
+    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
+      new JsonSerializerOptions(JsonSerializerDefaults.General)
+    );
+
+    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
+
+    if (partConfigurationState != null) {
+      appendMissingDataToPartConfigurationStateSection(partConfigurationState.Sections, partIdList ?? []);
+    }
+
+    string json = JsonSerializer.Serialize(partConfigurationState);
+
     return json;
   }
 }

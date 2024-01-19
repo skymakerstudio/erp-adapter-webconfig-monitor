@@ -3,6 +3,8 @@ Library for making complex configuration structures in ERP Monitor G5 easy to wo
 
 Library also eliminate dependency for internal guid references that changes in Monitor G5
 
+Include the AdapterLibrary in your project
+
 ## Example input / output to use on web on product configuration
 ```json
 {
@@ -101,9 +103,20 @@ string partConfigStateAfterUpdate = postRequestTo(apiUrl + "/Common/PartConfigur
 
 ```
 
-## How to use
+## Get G5 configurator definition to Web (for sync)
+```C#
+AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
-Include the AdapterLibrary in your project
+string partConfigState = postRequestTo(monitorAPI + "Common/PartConfigurations/Get", args); 
+
+var partNumbersWithDescriptions = postRequestTo(apiUrl + "Inventory/Parts?$select=Id,PartNumber,Description", args); // Include Description to use with SelectionGroup row labels
+
+string augmentedPartConfigurationState = adapter.getConfiguratorDefinition(partConfigState, partNumbersWithDescriptions);
+
+```
+
+# How to develop
+
 
 ## How to test - VSCODE
 
@@ -116,7 +129,7 @@ dotnet test
 ```
 
 
-## FAQ
+# FAQ
 
 ### Why is a list of all partNumbers needed?
 additional partNumbers argument is required until PartConfigurationState rows contain the PartNumber information (if one day SelectionGroupRow can be expanded direct in PartConfigurationState with PartNumber this can be removed)
