@@ -133,6 +133,14 @@ public class MonitorAPI
         var currVar = section.Variables[j];
         variables.Add(currVar);
       }
+
+      // Recursive fetch of sub sections content
+      if (section.Sections.Length > 0) {
+        var subVariables = getAllVariablesFromSections(section.Sections);
+        foreach (VariableState subVar in subVariables) {
+          variables.Add(subVar);
+        }
+      }
       
     }
     return variables;
@@ -146,6 +154,14 @@ public class MonitorAPI
       for (int j = 0; j < section.SelectionGroups.Length; j++) {
         var currVar = section.SelectionGroups[j];
         selectionGroups.Add(currVar);
+      }
+
+      // Recursive fetch of sub sections content
+      if (section.Sections.Length > 0) {
+        var subGroups = getAllSelectionGroupsFromSections(section.Sections);
+        foreach (SelectionGroupState subSelection in subGroups) {
+          selectionGroups.Add(subSelection);
+        }
       }
       
     }

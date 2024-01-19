@@ -3,7 +3,7 @@ using System.Text.Json;
 using AdapterLibrary;
 
 [TestClass]
-public class UnitTest1
+public class MonitorTests
 {
 
     [TestMethod]
@@ -104,6 +104,5 @@ public class UnitTest1
       var expectedResult = JsonSerializer.Serialize(partExpectedState1);
 
       Assert.AreEqual(result, expectedResult);
-
     }
 }
