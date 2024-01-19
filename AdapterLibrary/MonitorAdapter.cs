@@ -67,6 +67,7 @@ public record UpdatePartConfigurationInstruction(
 
 public record SelectionGroupRowUpdate(
   string SelectionGroupRowId,
+  string PartId,
   bool? Selected,
   int? Quantity
 );
@@ -80,13 +81,18 @@ public record PartNumberMap (
   string? Description
 );
 
+public record RowPartIdMap (
+  string Id,
+  string PartId
+);
+
 public record WebConfigurationIdMap (
   Dictionary<string, string> values,
   Dictionary<string, string> texts,
   Dictionary<string, string> booleans,
   Dictionary<string, string> selectionGroups,
   Dictionary<string, string> selectionRows,
-  Dictionary<string, List<string>> selectionGroupRowIds
+  Dictionary<string, List<RowPartIdMap>> selectionGroupRowIds
 );
 
 // --------------------------------- Web configuration API ----------------------------------------
@@ -207,7 +213,7 @@ public class MonitorAPI
     Dictionary<string, string> booleanNameToId = new Dictionary<string, string>();
     Dictionary<string, string> selectionGroupCodeToId = new Dictionary<string, string>();
     Dictionary<string, string> selectionRowPartNumberToId = new Dictionary<string, string>();
-    Dictionary<string, List<string>> selectionGroupRowIds = new Dictionary<string, List<string>>();
+    Dictionary<string, List<RowPartIdMap>> selectionGroupRowIds = new Dictionary<string, List<RowPartIdMap>>();
 
     var sections = partConfigurationState?.Sections ?? [];
     var variablesInSections = getAllVariablesFromSections(sections);
@@ -229,12 +235,12 @@ public class MonitorAPI
     for (int i = 0; i<selectionGroupsInSections.Count; i++) {
       var currSection = selectionGroupsInSections[i];
       selectionGroupCodeToId.Add(currSection.Code, currSection.Id);
-      List<string> rowIdList = new List<string>();
+      List<RowPartIdMap> rowIdList = new List<RowPartIdMap>();
       for (int j = 0; j<currSection.Rows.Length; j++) {
         var row = currSection.Rows[j];
         var partNumber = getPartFromPartId(row.PartId, partIdList).PartNumber;
         selectionRowPartNumberToId.Add(partNumber, row.Id);
-        rowIdList.Add(row.Id);
+        rowIdList.Add(new RowPartIdMap(row.Id, row.PartId));
       }
       selectionGroupRowIds.Add(currSection.Code, rowIdList);
     }
@@ -378,8 +384,8 @@ public class MonitorAPI
 
             // First - Add instruction to unselect all rows first
             for (int i = 0; i<allRows.Count; i++) {
-              string rowId = allRows[i];
-              rowUnselectInstructions.Add(new SelectionGroupRowUpdate(rowId, false, null)); 
+              var row = allRows[i];
+              rowUnselectInstructions.Add(new SelectionGroupRowUpdate(row.Id, row.PartId, false, null)); 
             }
 
             // Secondly - change rows that exist in web selection
@@ -391,7 +397,7 @@ public class MonitorAPI
               });
               var rowInstruction = rowUpdateInstruction;
               if (rowToSelect != null) {
-                rowInstruction = new SelectionGroupRowUpdate(rowUpdateInstruction.SelectionGroupRowId, true, rowToSelect.quantity);
+                rowInstruction = new SelectionGroupRowUpdate(rowUpdateInstruction.SelectionGroupRowId, rowUpdateInstruction.PartId, true, rowToSelect.quantity);
               }
               instructions.Add(new UpdatePartConfigurationInstruction(1, null, rowInstruction));
             }
