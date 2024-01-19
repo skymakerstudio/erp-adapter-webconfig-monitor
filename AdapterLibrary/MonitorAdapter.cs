@@ -322,7 +322,9 @@ public class MonitorAPI
         selections,
     };
 
-    string json = JsonSerializer.Serialize(state);
+    string json = JsonSerializer.Serialize(state,  new 
+     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull 
+    });
 
     return json;
   }
@@ -398,7 +400,9 @@ public class MonitorAPI
     }
     
     var configurationUpdate = new { SessionId = sessionId, Instructions = instructions };
-    string json = JsonSerializer.Serialize(configurationUpdate);
+    string json = JsonSerializer.Serialize(configurationUpdate,  new 
+     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull 
+    });
     return json;
   }
 
@@ -414,7 +418,9 @@ public class MonitorAPI
       appendMissingDataToPartConfigurationStateSection(partConfigurationState.Sections, partIdList ?? []);
     }
 
-    string json = JsonSerializer.Serialize(partConfigurationState);
+    string json = JsonSerializer.Serialize(partConfigurationState,  new 
+     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull 
+    });
 
     return json;
   }
