@@ -15,8 +15,7 @@ public class UnitTest1
       AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
       string result = adapter.configurationToWeb(M240_PartConfigurationState, M240_All_Parts);
-
-      // string partExpectedState1 = "{\"partId\":\"707433796463833993\",\"partNumber\":\"M-240\",\"variables\":{\"Width\":{\"id\":\"707434600696463128\",\"name\":\"Width\",\"value\":100}}}";
+  
       var partExpectedState1 = new 
       {
         partNumber = "M-240",
