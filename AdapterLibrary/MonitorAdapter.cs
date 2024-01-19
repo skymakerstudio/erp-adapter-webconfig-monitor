@@ -1,13 +1,10 @@
 ﻿namespace AdapterLibrary;
 
-using System.Numerics;
 using System.Text.Json;
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization.Metadata;
-using System.Runtime.Versioning;
-using System.Windows.Markup;
 
+// ---------------------------- Monitor API read records ---------------------------------
 public record VariableValue( 
   int Type, // String: 0, Numeric: 1, Boolean: 2, Date: 3
   string? StringValue,
@@ -23,15 +20,10 @@ public record VariableState(
   VariableValue Value
 );
 
-public record VariableUpdate(
-  string VariableId,
-  VariableValue Value
-);
-
-public record UpdatePartConfigurationInstruction(
-  int Type, // 0 = Variable, 1 = SelectionGroupRow
-  VariableUpdate? Variable,
-  SelectionGroupRowUpdate? SelectionGroupRow
+public record SelectionGroupState(
+  string Code,
+  string Id,
+  SelectionGroupRowState[] Rows
 );
 
 public record SelectionGroupRowState(
@@ -39,18 +31,6 @@ public record SelectionGroupRowState(
   string PartId,
   bool IsSelected,
   int Quantity
-);
-
-public record SelectionGroupRowUpdate(
-  string SelectionGroupRowId,
-  bool? Selected,
-  int? Quantity
-);
-
-public record SelectionGroupState(
-  string Code,
-  string Id,
-  SelectionGroupRowState[] Rows
 );
 
 public record SectionState (
@@ -65,82 +45,35 @@ public record PartConfigurationState(
   bool IsValid,
   string PartId,
   int Quantity,
-  SectionState[] Sections
-  // "ExpiresAt": "0001-01-01T00:00:00+00:00",
-  // "CustomerId": 0,
-  // "Comment": null,
-  // "PartConfigurationTemplateSnapshotId": 0,
-  // "PartConfigurationTemplateId": 0,
-  // "PartConfigurationTemplateVersion": 0,
-  // "PartConfigurationId": 0,
-  // "AlternativePreparationCode": null,
-  // "DiscountPercentage": 0.0,
-  // "LockedDiscount": false,
-  // "LockedUnitPrice": false,
-  // "PriceFormulaFactor": 0.0,
-  
-  // "StandardPrice": null,
-  // "UnitPrice": null,
-  // "UnitPriceInCompanyCurrency": null,
-  // "WeightPerUnit": null,
-  
+  SectionState[] Sections 
 );
+
+
+// ----------------------------- Monitor API update records ---------------------------------------
+public record VariableUpdate(
+  string VariableId,
+  VariableValue Value
+);
+
+public record UpdatePartConfigurationInstruction(
+  int Type, // 0 = Variable, 1 = SelectionGroupRow
+  VariableUpdate? Variable,
+  SelectionGroupRowUpdate? SelectionGroupRow
+);
+
+public record SelectionGroupRowUpdate(
+  string SelectionGroupRowId,
+  bool? Selected,
+  int? Quantity
+);
+
+
+// ------------------------------ Maps & Helper records -------------------------------------------------
 
 public record PartNumberMap (
   string Id,
-  string PartNumber
-);
-
-
-
-public class WebValidationResult
- {
-
-  public required string Id;
-
-  public required string Description;
-
-  public required string[] ErrorMessages;
-
-}
-
-public record WebSelectionRowItem (
-  string selection,
-  int quantity
-);
-
-public record WebSelectionGroupState(
-
-  string code,
-  string description
-
-  // WebSelectionRowItem[] values
-);
-
-public record WebVariableState(
-  string name,
-  // public required string description;
-
-  double value
-
-  // public required WebValidationResult[] validationResults;
-);
-
-public record WebConfigurationState(
-
-    string partNumber,
-    Dictionary<string, double> values,
-    Dictionary<string, string> texts,
-    Dictionary<string, bool> booleans,
-    Dictionary<string, WebSelectionRowItem[]> selections
-
-
-    // public required string partConfigurationId;
-    // public required string configurationSessionId;
-    // public required int quantity;
-
-    // public required Dictionary<string, WebVariableState>[] Variables;
-    // public required Dictionary<string, WebSelectionGroupState>[] SelectionGroups;
+  string PartNumber,
+  string? Description
 );
 
 public record WebConfigurationIdMap (
@@ -152,6 +85,33 @@ public record WebConfigurationIdMap (
   Dictionary<string, List<string>> selectionGroupRowIds
 );
 
+// --------------------------------- Web configuration API ----------------------------------------
+public class WebValidationResult
+ {
+
+  public required string Id;
+
+  public required string Description;
+
+  public required string[] ErrorMessages;
+}
+
+public record WebSelectionRowItem (
+  string selection,
+  int quantity
+);
+
+public record WebConfigurationState(
+
+    string partNumber,
+    Dictionary<string, double> values,
+    Dictionary<string, string> texts,
+    Dictionary<string, bool> booleans,
+    Dictionary<string, WebSelectionRowItem[]> selections
+);
+
+
+// ----------------------------------- Main Adapter class -----------------------------------------
 public class MonitorAPI
 {
 
