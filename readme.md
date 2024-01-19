@@ -97,7 +97,7 @@ var partNumbers = postRequestTo(apiUrl + "Inventory/Parts?$select=Id,PartNumber"
 
 string instructionsAsJson = adapter.webToConfigurationInstructions(serielizedJson, sessionId, partConfigStateResponse, partNumbersResponse);
 
-string partConfigState = postRequestTo(apiUrl + "/Common/PartConfigurations/Update", instructionsAsJson)
+string partConfigStateAfterUpdate = postRequestTo(apiUrl + "/Common/PartConfigurations/Update", instructionsAsJson)
 
 ```
 
