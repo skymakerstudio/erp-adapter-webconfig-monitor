@@ -26,7 +26,7 @@ Library also eliminate dependency for internal guid references that changes in M
 }
 ```
 
-## Transform G5 configuraiton to Web
+## Transform G5 configuration to Web
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
