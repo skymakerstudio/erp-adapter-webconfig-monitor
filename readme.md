@@ -1,25 +1,20 @@
 # Monitor G5 PartConfigration web adapter
 Library for making complex configuration structures in ERP Monitor G5 easy to work with in a web context
 
+Library also eliminate dependency for internal guid references that changes in Monitor G5
+
 ## Transform G5 configuraiton to Web
 ```C#
-private static readonly HttpClient client = new HttpClient();
-var apiUrl = "https://localhost:8001/sv/001.1/api/v1/";
-var args = new Dictionary<string, string>
-  {
-      { "SessionId", "XXXXX" },
-  };
+AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
-var content = new FormUrlEncodedContent(args);
-var configResponse = await client.postAsync(apiUrl + "Common/PartConfigurations/Get", content);
-var partConfigState = await configResponse.Content.ReadAsStringAsync(); // PartConfigurationState
+string partConfigState = postRequestTo(monitorAPI + "Common/PartConfigurations/Get"); 
 
-var partIdListResponse = client.postAsync(apiUrl + "Inventory/Parts");
+var partNumbers = client.postAsync(apiUrl + "Inventory/Parts?$select=Id,PartNumber");
 
-var partIdList = await partIdListResponse.Content.ReadAsStringAsync();
-string result = adapter.configurationToWeb(partConfigState, partIdList);
+string resultAsJsonString = adapter.configurationToWeb(partConfigState, partNumbers);
 
 ```
+*additional partNumbers argument is required until PartConfigurationState rows contain the PartNumber information (feature request for expandable PartConfigurationState)
 
 ## Example output
 ```json
