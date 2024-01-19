@@ -9,9 +9,9 @@ using System.Runtime.Versioning;
 
 public record VariableValue( 
   int Type, // String: 0, Numeric: 1, Boolean: 2, Date: 3
-  string StringValue,
-  bool BooleanValue,
-  double NumericValue,
+  string? StringValue,
+  bool? BooleanValue,
+  double? NumericValue,
   DateTime? DateTimeValue
 );
 
@@ -22,12 +22,30 @@ public record VariableState(
   VariableValue Value
 );
 
+public record VariableUpdate(
+  string VariableId,
+  VariableValue Value
+);
+
+public record UpdatePartConfigurationInstruction(
+  int Type, // 0 = Variable, 1 = SelectionGroupRow
+  VariableUpdate? Variable,
+  SelectionGroupRowUpdate? SelectionGroupRow
+);
+
 public record SelectionGroupRowState(
   string Id,
   string PartId,
   bool IsSelected,
   int Quantity
 );
+
+public record SelectionGroupRowUpdate(
+  string SelectionGroupRowId,
+  bool? Selected,
+  int? Quantity
+);
+
 public record SelectionGroupState(
   string Code,
   SelectionGroupRowState[] Rows
@@ -167,9 +185,9 @@ public class MonitorAPI
           for (int j = 0; j < section.Variables.Length; j++) {
             var secVariable = section.Variables[j];
             if (secVariable != null) {
-              if ((secVariable.VariableType == 1) & (secVariable.Value.Type == 1)) {
-                // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
-                values.Add(secVariable.Name, secVariable.Value.NumericValue);
+              if ((secVariable.VariableType == 1) & (secVariable.Value.Type == 1) & (secVariable.Value.NumericValue != null)) {
+                double value = secVariable.Value.NumericValue ?? 0;
+                values.Add(secVariable.Name, value);
               } else {
                 // todo: Add String to texts and Date to dates
               }
@@ -222,7 +240,37 @@ public class MonitorAPI
     return json;
   }
 
-  public string webToConfigurationInstructions () {
-    return "";
+  public string webToConfigurationInstructions (string webConfigStateJSON, string sessionId, string partNumberListJSON) {
+
+    var instructions = new 
+      {
+        SessionId = "b6ee6341-92ed-483a-85f5-73180bc04c42",
+        Instructions = new List<UpdatePartConfigurationInstruction>(){
+          new UpdatePartConfigurationInstruction(
+            0, 
+            new VariableUpdate("707434600696463128", 
+              new VariableValue(1, null, null, 100, null)
+            ),
+            null
+          ),
+          new UpdatePartConfigurationInstruction(
+            0, 
+            new VariableUpdate("707434668342198034", 
+              new VariableValue(1, null, null, 100, null)
+            ),
+            null
+          ),
+           new UpdatePartConfigurationInstruction(
+            1, 
+            null,
+            new SelectionGroupRowUpdate("993518285080342908", true, null)
+          ),
+        }
+        
+      };
+
+      string json = JsonSerializer.Serialize(instructions);
+
+    return json;
   }
 }
