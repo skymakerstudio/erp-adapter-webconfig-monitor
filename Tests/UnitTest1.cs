@@ -19,9 +19,8 @@ public class UnitTest1
       // string partExpectedState1 = "{\"partId\":\"707433796463833993\",\"partNumber\":\"M-240\",\"variables\":{\"Width\":{\"id\":\"707434600696463128\",\"name\":\"Width\",\"value\":100}}}";
       var partExpectedState1 = new 
       {
-        partId = "707433796463833993",
         partNumber = "M-240",
-        variables = new Dictionary<string, double>(){
+        values = new Dictionary<string, double>(){
           ["Width"] = 100,
           ["Depth"] = 100,
           ["HoleSize"] = 5,
@@ -30,11 +29,16 @@ public class UnitTest1
           ["Perforation"] = 0.16,
           ["nHoles"] = 64,
         },
-        selectionGroups = new Dictionary<string, WebSelectionRowItem[]>(){
+        texts = new Dictionary<string, string>(),
+        selections = new Dictionary<string, WebSelectionRowItem[]>(){
           ["M240-1"] = [new WebSelectionRowItem("M-240-1", 1)]
         }
       };
       var expectedResult = JsonSerializer.Serialize(partExpectedState1);
+
+      var partReferenceIndex = result.IndexOf("partId");
+      Assert.AreEqual(partReferenceIndex, -1);
       Assert.AreEqual(result, expectedResult);
+
     }
 }

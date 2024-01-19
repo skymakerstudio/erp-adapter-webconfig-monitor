@@ -101,7 +101,6 @@ public record WebSelectionRowItem (
 
 public record WebSelectionGroupState(
 
-  string id,
   string code,
   string description
 
@@ -109,7 +108,6 @@ public record WebSelectionGroupState(
 );
 
 public record WebVariableState(
-  string id, 
   string name,
   // public required string description;
 
@@ -121,8 +119,9 @@ public record WebVariableState(
 public record WebConfigurationState(
 
     string partNumber,
-    string partId,
-    Dictionary<string, double>[] variables
+    Dictionary<string, double>[] values,
+    Dictionary<string, string>[] texts,
+    Dictionary<string, WebSelectionRowItem>[] selections
     // public required string partConfigurationId;
     // public required string configurationSessionId;
     // public required int quantity;
@@ -151,9 +150,9 @@ public class MonitorAPI
 
     List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
-    var variables = new Dictionary<string, double>();
-    // var texts = new Dictionary<string, string>();
-    var selectionGroups = new Dictionary<string, List<WebSelectionRowItem>>();
+    var values = new Dictionary<string, double>();
+    var texts = new Dictionary<string, string>();
+    var selections = new Dictionary<string, List<WebSelectionRowItem>>();
         // {
         //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
         // };
@@ -168,7 +167,7 @@ public class MonitorAPI
             if (secVariable != null) {
               if ((secVariable.VariableType == 1) & (secVariable.Value.Type == 1)) {
                 // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
-                variables.Add(secVariable.Name, secVariable.Value.NumericValue);
+                values.Add(secVariable.Name, secVariable.Value.NumericValue);
               } else {
                 // todo: Add String to texts and Date to dates
               }
@@ -189,7 +188,7 @@ public class MonitorAPI
                 }
               }
 
-              selectionGroups.Add(selGroup.Code, selectedRows);
+              selections.Add(selGroup.Code, selectedRows);
                 // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
               
             }
@@ -203,13 +202,13 @@ public class MonitorAPI
 
     var state = new 
     {
-        partId,
         partNumber,
         // partConfigurationId = "",
         // configurationSessionId = "",
         // quantity = 1,
-        variables,
-        selectionGroups,
+        values,
+        texts,
+        selections,
         // Variables = [],
     };
 
