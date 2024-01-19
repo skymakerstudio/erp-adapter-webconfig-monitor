@@ -150,6 +150,7 @@ public class MonitorAPI
 
     List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
+    
     var values = new Dictionary<string, double>();
     var texts = new Dictionary<string, string>();
     var selections = new Dictionary<string, List<WebSelectionRowItem>>();
@@ -157,6 +158,7 @@ public class MonitorAPI
         //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
         // };
     if (partConfigurationState != null) {
+      
       for (int i = 0; i < partConfigurationState.Sections.Length; i++) 
       {
 
@@ -200,9 +202,12 @@ public class MonitorAPI
     var partId = (partConfigurationState != null) ? partConfigurationState.PartId : "";
     var partNumber = getPartNumberFromId(partId, partIdList ?? ([]));
 
+    bool valid = (partConfigurationState != null) ? partConfigurationState.IsValid : false;
+
     var state = new 
     {
         partNumber,
+        valid,
         // partConfigurationId = "",
         // configurationSessionId = "",
         // quantity = 1,
