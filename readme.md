@@ -134,9 +134,6 @@ dotnet test
 ### Why is a list of all partNumbers needed?
 additional partNumbers argument is required until PartConfigurationState rows contain the PartNumber information (if one day SelectionGroupRow can be expanded direct in PartConfigurationState with PartNumber this can be removed)
 
-### Why cant we use the entire PartConfigurationState direct?
-PartConfigurationState contains too much information, and not all should be possible to modify on the web client side
-
 ### Why do we need the PartConfigurationState for generating the return instructions
 A fresh PartConfigurationState, together with part number list, works as a definition for the latest guids.
 
