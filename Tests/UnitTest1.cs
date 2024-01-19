@@ -37,7 +37,7 @@ public class UnitTest1
       var expectedResult = JsonSerializer.Serialize(partExpectedState1);
 
       var partReferenceIndex = result.IndexOf("partId");
-      Assert.AreEqual(partReferenceIndex, -1);
+      Assert.AreEqual(partReferenceIndex, -1); // Hide all guids since they tend to change and cannot be referenced
       Assert.AreEqual(result, expectedResult);
 
     }
