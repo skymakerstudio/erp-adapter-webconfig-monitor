@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization.Metadata;
 using System.Runtime.Versioning;
+using System.Windows.Markup;
 
 public record VariableValue( 
   int Type, // String: 0, Numeric: 1, Boolean: 2, Date: 3
@@ -48,14 +49,15 @@ public record SelectionGroupRowUpdate(
 
 public record SelectionGroupState(
   string Code,
+  string Id,
   SelectionGroupRowState[] Rows
 );
 
 public record SectionState (
   string Id,
   VariableState[] Variables,
-  SelectionGroupState[] SelectionGroups
-
+  SelectionGroupState[] SelectionGroups,
+  SectionState[] Sections
 );
 
 public record PartConfigurationState(
@@ -137,9 +139,12 @@ public record WebVariableState(
 public record WebConfigurationState(
 
     string partNumber,
-    Dictionary<string, double>[] values,
-    Dictionary<string, string>[] texts,
-    Dictionary<string, WebSelectionRowItem>[] selections
+    Dictionary<string, double> values,
+    Dictionary<string, string> texts,
+    Dictionary<string, bool> booleans
+    // Dictionary<string, WebSelectionRowItem> selections
+
+
     // public required string partConfigurationId;
     // public required string configurationSessionId;
     // public required int quantity;
@@ -148,16 +153,104 @@ public record WebConfigurationState(
     // public required Dictionary<string, WebSelectionGroupState>[] SelectionGroups;
 );
 
+public record WebConfigurationIdMap (
+  Dictionary<string, string> values,
+  Dictionary<string, string> texts,
+  Dictionary<string, string> booleans,
+  Dictionary<string, string> selectionGroups,
+  Dictionary<string, string> selectionRows
+);
+
 public class MonitorAPI
 {
 
-  string getPartNumberFromId (string id, List<PartNumberMap> partNumberList) {
-    var partNumber = partNumberList.Find(item => item.Id == id);
+  // todo: replace with map
+  string getPartNumberFromPartId (string id, List<PartNumberMap>? partNumberList) {
+    var partNumber = (partNumberList ?? []).Find(item => item.Id == id);
     if (partNumber != null) {
       return partNumber.PartNumber;
     } else {
       throw new Exception();
     }
+  }
+
+  List<VariableState> getAllVariablesFromSections (SectionState[] sections) {
+    List<VariableState> variables = new List<VariableState>();
+    for (int i = 0; i < sections.Length; i++) {
+      var section = sections[i];
+      // section.Variables
+      for (int j = 0; j < section.Variables.Length; j++) {
+        var currVar = section.Variables[j];
+        variables.Add(currVar);
+      }
+      
+    }
+    return variables;
+  }
+
+  List<SelectionGroupState> getAllSelectionGroupsFromSections (SectionState[] sections) {
+    List<SelectionGroupState> selectionGroups = new List<SelectionGroupState>();
+    for (int i = 0; i < sections.Length; i++) {
+      var section = sections[i];
+      // section.Variables
+      for (int j = 0; j < section.SelectionGroups.Length; j++) {
+        var currVar = section.SelectionGroups[j];
+        selectionGroups.Add(currVar);
+      }
+      
+    }
+    return selectionGroups;
+  }
+
+  // todo: Rename to generateIdMaps and complement with getPartIdToPartMap
+  public WebConfigurationIdMap generateCodeToIdMap (string partConfigurationStateJSON, string partNumberListJSON) { 
+    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
+      new JsonSerializerOptions(JsonSerializerDefaults.General)
+    );
+
+    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
+
+    Dictionary<string, string> valueNameToId = new Dictionary<string, string>();
+    Dictionary<string, string> textNameToId = new Dictionary<string, string>();
+    Dictionary<string, string> booleanNameToId = new Dictionary<string, string>();
+    Dictionary<string, string> selectionGroupCodeToId = new Dictionary<string, string>();
+    Dictionary<string, string> selectionRowPartNumberToId = new Dictionary<string, string>();
+
+    var sections = partConfigurationState?.Sections ?? [];
+    var variablesInSections = getAllVariablesFromSections(sections);
+
+    for (int i = 0; i<variablesInSections.Count; i++) {
+      var currVar = variablesInSections[i];
+      if (currVar.VariableType == 0) { // string
+        textNameToId.Add(currVar.Name, currVar.Id);
+      } else if (currVar.VariableType == 1) { // number
+        valueNameToId.Add(currVar.Name, currVar.Id);
+      } else if (currVar.VariableType == 3) { // boolean
+        booleanNameToId.Add(currVar.Name, currVar.Id);
+      } else {
+        // todo: Handle Date and unkown
+      }
+    }
+
+    var selectionGroupsInSections = getAllSelectionGroupsFromSections(sections);
+    for (int i = 0; i<selectionGroupsInSections.Count; i++) {
+      var currSection = selectionGroupsInSections[i];
+      selectionGroupCodeToId.Add(currSection.Code, currSection.Id);
+      for (int j = 0; j<currSection.Rows.Length; j++) {
+        var row = currSection.Rows[j];
+        var partNumber = getPartNumberFromPartId(row.PartId, partIdList);
+        selectionRowPartNumberToId.Add(partNumber, row.Id);
+      }
+    }
+
+    var map = new WebConfigurationIdMap(
+      valueNameToId,
+      textNameToId,
+      booleanNameToId,
+      selectionGroupCodeToId,
+      selectionRowPartNumberToId
+    );
+    return map;
   }
 
   public string configurationToWeb (string partConfigurationStateJSON, string partNumberListJSON) {
@@ -202,7 +295,7 @@ public class MonitorAPI
               for (int k = 0; k < selGroup.Rows.Length; k++) {
                 var row = selGroup.Rows[k];
                 if (row.IsSelected) {
-                  var rowPartNumber = getPartNumberFromId(row.PartId, partIdList ?? ([]));
+                  var rowPartNumber = getPartNumberFromPartId(row.PartId, partIdList ?? ([]));
                   var webValue = new WebSelectionRowItem(rowPartNumber, row.Quantity);
                   selectedRows.Add(webValue);
                 }
@@ -218,7 +311,7 @@ public class MonitorAPI
     }
 
     var partId = (partConfigurationState != null) ? partConfigurationState.PartId : "";
-    var partNumber = getPartNumberFromId(partId, partIdList ?? ([]));
+    var partNumber = getPartNumberFromPartId(partId, partIdList ?? ([]));
 
     bool valid = (partConfigurationState != null) ? partConfigurationState.IsValid : false;
 
@@ -226,13 +319,10 @@ public class MonitorAPI
     {
         partNumber,
         valid,
-        // partConfigurationId = "",
-        // configurationSessionId = "",
         // quantity = 1,
         values,
         texts,
         selections,
-        // Variables = [],
     };
 
     string json = JsonSerializer.Serialize(state);
@@ -240,37 +330,48 @@ public class MonitorAPI
     return json;
   }
 
-  public string webToConfigurationInstructions (string webConfigStateJSON, string sessionId, string partNumberListJSON) {
+  public string webToConfigurationInstructions (string webConfigStateJSON, string sessionId, string partConfigurationStateJSON, string partNumberListJSON) {
+    
+    WebConfigurationState? webConfigState =  JsonSerializer.Deserialize<WebConfigurationState>(webConfigStateJSON, 
+      new JsonSerializerOptions(JsonSerializerDefaults.General)
+    );
 
-    var instructions = new 
-      {
-        SessionId = "b6ee6341-92ed-483a-85f5-73180bc04c42",
-        Instructions = new List<UpdatePartConfigurationInstruction>(){
-          new UpdatePartConfigurationInstruction(
-            0, 
-            new VariableUpdate("707434600696463128", 
-              new VariableValue(1, null, null, 100, null)
-            ),
-            null
-          ),
-          new UpdatePartConfigurationInstruction(
-            0, 
-            new VariableUpdate("707434668342198034", 
-              new VariableValue(1, null, null, 100, null)
-            ),
-            null
-          ),
-           new UpdatePartConfigurationInstruction(
-            1, 
-            null,
-            new SelectionGroupRowUpdate("993518285080342908", true, null)
-          ),
+    var mapPartNumberToId = generateCodeToIdMap(partConfigurationStateJSON, partNumberListJSON);
+
+    var instructions = new List<UpdatePartConfigurationInstruction>();
+
+    if (webConfigState != null) {
+      if (webConfigState.values != null) {
+        foreach (string key in webConfigState.values.Keys) { 
+            var numericValue = webConfigState.values[key];
+            string variableId = mapPartNumberToId.values.ContainsKey(key) ? (mapPartNumberToId.values[key] ?? "") : "";
+            instructions.Add(
+              new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(1, null, null, numericValue, null)), null)
+            );
         }
-        
-      };
+      }
+      if (webConfigState.texts != null) {
+        foreach (string key in webConfigState.texts.Keys) { 
+            var textValue = webConfigState.texts[key];
+            string variableId = mapPartNumberToId.texts.ContainsKey(key) ? (mapPartNumberToId.texts[key] ?? "") : "";
+            instructions.Add(
+              new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(0, textValue, null, null, null)), null)
+            );
+        }
+      }
+      if (webConfigState.booleans != null) {
+        foreach (string key in webConfigState.booleans.Keys) { 
+            var booleanValue = webConfigState.booleans[key];
+            string variableId = mapPartNumberToId.booleans.ContainsKey(key) ? (mapPartNumberToId.booleans[key] ?? "") : "";
+            instructions.Add(
+              new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(0, null, booleanValue, null, null)), null)
+            );
+        }
+      }
+    }
 
-      string json = JsonSerializer.Serialize(instructions);
-
+    var configurationUpdate = new { SessionId = sessionId, Instructions = instructions };
+    string json = JsonSerializer.Serialize(configurationUpdate);
     return json;
   }
 }
