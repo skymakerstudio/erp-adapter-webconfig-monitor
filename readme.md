@@ -140,4 +140,7 @@ PartConfigurationState contains too much information, and not all should be poss
 ### Why do we need the PartConfigurationState for generating the return instructions
 A fresh PartConfigurationState, together with part number list, works as a definition for the latest guids.
 
+### How should I use the getConfiguratorDefinition?
+Instead of sending lots of data every time an update is done the important data for structure can be handeld via the definition. While actual inputs / outputs only contain data that should change.
+
 
