@@ -103,9 +103,9 @@ public record WebSelectionGroupState(
 
   string id,
   string code,
-  string description,
+  string description
 
-  WebSelectionRowItem[] values
+  // WebSelectionRowItem[] values
 );
 
 public record WebVariableState(
@@ -130,10 +130,6 @@ public record WebConfigurationState(
     // public required Dictionary<string, WebVariableState>[] Variables;
     // public required Dictionary<string, WebSelectionGroupState>[] SelectionGroups;
 );
-
-
-
-
 
 public class MonitorAPI
 {
