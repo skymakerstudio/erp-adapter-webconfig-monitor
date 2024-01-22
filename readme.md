@@ -122,9 +122,10 @@ string augmentedPartConfigurationState = adapter.getConfiguratorDefinition(partC
 
 MSTests defined in Test folder
 
-Install C# Devkit and run the Testing -> Run "Debug Tests" tab. Or in terminal:
+Install C# Devkit and run the Testing -> Run "Debug Tests" tab. Or in terminal ([see Gettings Started](https://code.visualstudio.com/docs/csharp/get-started)):
 
 ```sh
+dotnet build
 dotnet test
 ```
 
