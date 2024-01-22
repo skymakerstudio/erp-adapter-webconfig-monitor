@@ -8,7 +8,7 @@ Include the AdapterLibrary in your project
 ## Example input / output to use on web on product configuration
 ```json
 {
-  "partNumber": "M-240",
+  "partNumber": "ConfigurablePlate1",
   "valid": true,
   "values": {
     "width": 100,
@@ -40,7 +40,7 @@ string resultAsJsonString = adapter.configurationToWeb(partConfigState, partNumb
 
 ```
 
-## Example of instructions to Common/PartConfigurations/Update
+## Example of instructions to Common/PartConfigurations/Update (see [Monitor API Docs](https://api.monitor.se/api/Monitor.API.Common.Commands.PartConfigurations.UpdatePartConfiguration.html))
 ```json
 {
     "SessionId": "b6ee6341-92ed-483a-85f5-73180bc04c42",
@@ -91,7 +91,7 @@ string resultAsJsonString = adapter.configurationToWeb(partConfigState, partNumb
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
-const serielizedJson = """{"partNumber":"M-240","values":{"width":123,"depth":456},"texts":{"marking":"PG2400A"},"selections":{"thickness":["T1_5"]}}""";
+const serielizedJson = """{"partNumber":"ConfigurablePlate1","values":{"width":123,"depth":456},"texts":{"marking":"PG2400A"},"selections":{"thickness":["T1_5"]}}""";
 
 string partConfigState = postRequestTo(monitorAPI + "Common/PartConfigurations/Get"); 
 
@@ -103,7 +103,7 @@ string partConfigStateAfterUpdate = postRequestTo(apiUrl + "/Common/PartConfigur
 
 ```
 
-## Get G5 configurator definition to Web (for sync)
+## Get G5 configurator definition to Web for synchronization ([see Monitor API docs](https://api.monitor.se/api/Monitor.API.Common.Commands.PartConfigurations.GetPartConfiguration.html))
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
