@@ -28,7 +28,7 @@ Include the AdapterLibrary in your project
 }
 ```
 
-## Transform G5 configuration to Web
+## Transform G5 configuration to Web (pseudo code)
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
@@ -87,7 +87,7 @@ string resultAsJsonString = adapter.configurationToWeb(partConfigState, partNumb
 }
 ```
 
-## Transform Web to G5 PartConfiguration update
+## Transform Web to G5 PartConfiguration update (pseudo code)
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
@@ -103,7 +103,7 @@ string partConfigStateAfterUpdate = postRequestTo(apiUrl + "/Common/PartConfigur
 
 ```
 
-## Get G5 configurator definition to Web for synchronization ([see Monitor API docs](https://api.monitor.se/api/Monitor.API.Common.Commands.PartConfigurations.GetPartConfiguration.html))
+## Get G5 configurator definition to Web for synchronization (pseudo code) ([see Monitor API docs](https://api.monitor.se/api/Monitor.API.Common.Commands.PartConfigurations.GetPartConfiguration.html))
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
