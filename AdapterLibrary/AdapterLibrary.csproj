@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>SkyMaker.Adapter.Monitor</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.2.1</Version>
     <Company>SkyMaker AB</Company>
     <Description>
       Web adapter for product configuration with Monitor G5 API
