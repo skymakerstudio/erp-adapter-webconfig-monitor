@@ -239,7 +239,8 @@ public class MonitorAPI
       for (int j = 0; j<currSection.Rows.Length; j++) {
         var row = currSection.Rows[j];
         var partNumber = getPartFromPartId(row.PartId, partIdList).PartNumber;
-        selectionRowPartNumberToId.Add(partNumber, row.Id);
+        var uniqueRowKey = getSelectionGroupRowKey(currSection.Code, partNumber);
+        selectionRowPartNumberToId.Add(uniqueRowKey, row.Id);
         rowIdList.Add(new RowPartIdMap(row.Id, row.PartId));
       }
       selectionGroupRowIds.Add(currSection.Code, rowIdList);
@@ -254,6 +255,10 @@ public class MonitorAPI
       selectionGroupRowIds
     );
     return map;
+  }
+
+  private static string getSelectionGroupRowKey (string selectionGroupCode, string selectedPartNumber) {
+    return selectionGroupCode + '_' + selectedPartNumber;
   }
 
   public string configurationToWeb (string partConfigurationStateJSON, string partNumberListJSON) {
@@ -342,7 +347,7 @@ public class MonitorAPI
     );
 
     var mapCodeToId = generateCodeToIdMaps(partConfigurationStateJSON, partNumberListJSON);
-
+    
     var instructions = new List<UpdatePartConfigurationInstruction>();
 
     if (webConfigState != null) {
@@ -374,11 +379,12 @@ public class MonitorAPI
         }
       }
       if (webConfigState.selections != null) {
-        foreach (string key in webConfigState.selections.Keys) { 
-            WebSelectionRowItem[] rowSelections = webConfigState.selections[key] ?? [];
-            string selectionId = mapCodeToId.selectionGroups.ContainsKey(key) ? (mapCodeToId.selectionGroups[key] ?? "") : "";
-          
-            var allRows = mapCodeToId.selectionGroupRowIds[key];
+        foreach (string selectedGroupCode in webConfigState.selections.Keys) { 
+
+            WebSelectionRowItem[] rowSelections = webConfigState.selections[selectedGroupCode] ?? [];
+            string selectionId = mapCodeToId.selectionGroups.ContainsKey(selectedGroupCode) ? (mapCodeToId.selectionGroups[selectedGroupCode] ?? "") : "";
+            
+            var allRows = mapCodeToId.selectionGroupRowIds[selectedGroupCode];
             
             List<SelectionGroupRowUpdate> rowUnselectInstructions = new List<SelectionGroupRowUpdate>();
 
@@ -392,7 +398,8 @@ public class MonitorAPI
             List<SelectionGroupRowUpdate> rowUpdateInstructions = new List<SelectionGroupRowUpdate>();
             foreach (SelectionGroupRowUpdate rowUpdateInstruction in rowUnselectInstructions) {
               var rowToSelect = Array.Find(rowSelections, item => {
-                var selectedRowId = mapCodeToId.selectionRows[item.selection];
+                var rowKey = getSelectionGroupRowKey(selectedGroupCode, item.selection);
+                var selectedRowId = mapCodeToId.selectionRows[rowKey];
                 return selectedRowId == rowUpdateInstruction.SelectionGroupRowId;
               });
               var rowInstruction = rowUpdateInstruction;
