@@ -91,7 +91,7 @@ public record WebConfigurationIdMap (
   Dictionary<string, string> texts,
   Dictionary<string, string> booleans,
   Dictionary<string, string> selectionGroups,
-  Dictionary<string, string> selectionRows,
+  Dictionary<string, List<string>> selectionRows,
   Dictionary<string, List<RowPartIdMap>> selectionGroupRowIds
 );
 
@@ -212,7 +212,7 @@ public class MonitorAPI
     Dictionary<string, string> textNameToId = new Dictionary<string, string>();
     Dictionary<string, string> booleanNameToId = new Dictionary<string, string>();
     Dictionary<string, string> selectionGroupCodeToId = new Dictionary<string, string>();
-    Dictionary<string, string> selectionRowPartNumberToId = new Dictionary<string, string>();
+    Dictionary<string, List<string>> selectionRowPartNumberToId = new Dictionary<string, List<string>>();
     Dictionary<string, List<RowPartIdMap>> selectionGroupRowIds = new Dictionary<string, List<RowPartIdMap>>();
 
     var sections = partConfigurationState?.Sections ?? [];
@@ -239,8 +239,16 @@ public class MonitorAPI
       for (int j = 0; j<currSection.Rows.Length; j++) {
         var row = currSection.Rows[j];
         var partNumber = getPartFromPartId(row.PartId, partIdList).PartNumber;
-        var uniqueRowKey = getSelectionGroupRowKey(currSection.Code, partNumber);
-        selectionRowPartNumberToId.Add(uniqueRowKey, row.Id);
+
+        if (selectionRowPartNumberToId.ContainsKey(partNumber))
+        {
+            selectionRowPartNumberToId[partNumber].Add(row.Id);
+        }
+        else
+        {
+            selectionRowPartNumberToId[partNumber] = new List<string>() { row.Id };
+        }
+
         rowIdList.Add(new RowPartIdMap(row.Id, row.PartId));
       }
       selectionGroupRowIds.Add(currSection.Code, rowIdList);
@@ -255,10 +263,6 @@ public class MonitorAPI
       selectionGroupRowIds
     );
     return map;
-  }
-
-  private static string getSelectionGroupRowKey (string selectionGroupCode, string selectedPartNumber) {
-    return selectionGroupCode + '_' + selectedPartNumber;
   }
 
   public string configurationToWeb (string partConfigurationStateJSON, string partNumberListJSON) {
@@ -347,7 +351,7 @@ public class MonitorAPI
     );
 
     var mapCodeToId = generateCodeToIdMaps(partConfigurationStateJSON, partNumberListJSON);
-    
+
     var instructions = new List<UpdatePartConfigurationInstruction>();
 
     if (webConfigState != null) {
@@ -379,12 +383,11 @@ public class MonitorAPI
         }
       }
       if (webConfigState.selections != null) {
-        foreach (string selectedGroupCode in webConfigState.selections.Keys) { 
-
-            WebSelectionRowItem[] rowSelections = webConfigState.selections[selectedGroupCode] ?? [];
-            string selectionId = mapCodeToId.selectionGroups.ContainsKey(selectedGroupCode) ? (mapCodeToId.selectionGroups[selectedGroupCode] ?? "") : "";
-            
-            var allRows = mapCodeToId.selectionGroupRowIds[selectedGroupCode];
+        foreach (string key in webConfigState.selections.Keys) { 
+            WebSelectionRowItem[] rowSelections = webConfigState.selections[key] ?? [];
+            string selectionId = mapCodeToId.selectionGroups.ContainsKey(key) ? (mapCodeToId.selectionGroups[key] ?? "") : "";
+          
+            var allRows = mapCodeToId.selectionGroupRowIds[key];
             
             List<SelectionGroupRowUpdate> rowUnselectInstructions = new List<SelectionGroupRowUpdate>();
 
@@ -398,9 +401,8 @@ public class MonitorAPI
             List<SelectionGroupRowUpdate> rowUpdateInstructions = new List<SelectionGroupRowUpdate>();
             foreach (SelectionGroupRowUpdate rowUpdateInstruction in rowUnselectInstructions) {
               var rowToSelect = Array.Find(rowSelections, item => {
-                var rowKey = getSelectionGroupRowKey(selectedGroupCode, item.selection);
-                var selectedRowId = mapCodeToId.selectionRows[rowKey];
-                return selectedRowId == rowUpdateInstruction.SelectionGroupRowId;
+                List<string> possibleRowIds = mapCodeToId.selectionRows[item.selection];
+                return possibleRowIds.Contains(rowUpdateInstruction.SelectionGroupRowId);
               });
               var rowInstruction = rowUpdateInstruction;
               if (rowToSelect != null) {
