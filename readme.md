@@ -25,7 +25,7 @@ To use this library, include the AdapterLibrary in your project.
     "thickness": [
       {
         "selection": "T1_5",
-        "quantity": 1
+        "quantity": 1.0
       }
     ]
   }

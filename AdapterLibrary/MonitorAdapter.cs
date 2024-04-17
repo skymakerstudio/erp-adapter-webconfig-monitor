@@ -30,7 +30,7 @@ public record SelectionGroupRowState(
   string Id,
   string PartId,
   bool IsSelected,
-  int Quantity
+  decimal Quantity
 )
 {
   public string? PartNumber { get; set; } // Not part of standard response
@@ -48,7 +48,7 @@ public record PartConfigurationState(
   string SessionId,
   bool IsValid,
   string PartId,
-  int Quantity,
+  decimal Quantity,
   SectionState[] Sections 
 );
 
@@ -69,7 +69,7 @@ public record SelectionGroupRowUpdate(
   string SelectionGroupRowId,
   string PartId,
   bool? Selected,
-  int? Quantity
+  decimal? Quantity
 );
 
 
@@ -108,7 +108,7 @@ public class WebValidationResult
 
 public record WebSelectionRowItem (
   string selection,
-  int quantity
+  decimal quantity
 );
 
 public record WebConfigurationState(
