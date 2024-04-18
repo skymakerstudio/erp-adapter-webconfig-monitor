@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 // ---------------------------- Monitor API read records ---------------------------------
-public record VariableValue( 
+public record VariableValue(
   int Type, // String: 0, Numeric: 1, Boolean: 2, Date: 3
   string? StringValue,
   bool? BooleanValue,
@@ -17,7 +17,7 @@ public record VariableState(
   string Id,
   string Name,
   int VariableType, // String: 0, Numeric: 1, Boolean: 2, Date: 3
-  VariableValue Value
+  VariableValue? Value
 );
 
 public record SelectionGroupState(
@@ -49,7 +49,7 @@ public record PartConfigurationState(
   bool IsValid,
   string PartId,
   decimal Quantity,
-  SectionState[] Sections 
+  SectionState[] Sections
 );
 
 
@@ -151,7 +151,7 @@ public class MonitorAPI
           variables.Add(subVar);
         }
       }
-      
+
     }
     return variables;
   }
@@ -173,14 +173,14 @@ public class MonitorAPI
           selectionGroups.Add(subSelection);
         }
       }
-      
+
     }
     return selectionGroups;
   }
 
   // Currently StateSelectionRow is missing the PartNumber and Description which has to be added
   private static void appendMissingDataToPartConfigurationStateSection (SectionState[] sections, List<PartNumberMap> partIdList) {
-    
+
     for (int i = 0; i < sections.Length; i++) {
       var section = sections[i];
       // section.Variables
@@ -197,12 +197,12 @@ public class MonitorAPI
       if (section.Sections.Length > 0) {
         appendMissingDataToPartConfigurationStateSection(section.Sections, partIdList);
       }
-      
+
     }
   }
 
-  public WebConfigurationIdMap generateCodeToIdMaps (string partConfigurationStateJSON, string partNumberListJSON) { 
-    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
+  public WebConfigurationIdMap generateCodeToIdMaps (string partConfigurationStateJSON, string partNumberListJSON) {
+    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
@@ -267,13 +267,13 @@ public class MonitorAPI
 
   public string configurationToWeb (string partConfigurationStateJSON, string partNumberListJSON) {
 
-    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
+    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
     List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
-    
+
     var values = new Dictionary<string, double>();
     var texts = new Dictionary<string, string>();
     var selections = new Dictionary<string, List<WebSelectionRowItem>>();
@@ -281,18 +281,19 @@ public class MonitorAPI
         //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
         // };
     if (partConfigurationState != null) {
-      
-      for (int i = 0; i < partConfigurationState.Sections.Length; i++) 
+
+      for (int i = 0; i < partConfigurationState.Sections.Length; i++)
       {
 
         var section = partConfigurationState.Sections[i];
         if (section != null) {
           for (int j = 0; j < section.Variables.Length; j++) {
             var secVariable = section.Variables[j];
-            if (secVariable != null) {
-              if ((secVariable.VariableType == 1) & (secVariable.Value.Type == 1) & (secVariable.Value.NumericValue != null)) {
-                double value = secVariable.Value.NumericValue ?? 0;
-                values.Add(secVariable.Name, value);
+            if (secVariable != null && secVariable.Value != null) {
+              if ((secVariable.VariableType == 1) & (secVariable?.Value?.Type == 1) & (secVariable?.Value?.NumericValue != null)) {
+                double value = secVariable?.Value?.NumericValue ?? 0;
+                string name = secVariable?.Name ?? "Undefined";
+                values.Add(name, value);
               } else {
                 // todo: Add String to texts and Date to dates
               }
@@ -303,7 +304,7 @@ public class MonitorAPI
             var selGroup = section.SelectionGroups[j];
             if (selGroup != null) {
               List<WebSelectionRowItem> selectedRows = new List<WebSelectionRowItem>();
-              
+
               for (int k = 0; k < selGroup.Rows.Length; k++) {
                 var row = selGroup.Rows[k];
                 if (row.IsSelected) {
@@ -315,7 +316,7 @@ public class MonitorAPI
 
               selections.Add(selGroup.Code, selectedRows);
                 // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
-              
+
             }
           }
         }
@@ -327,7 +328,7 @@ public class MonitorAPI
 
     bool valid = (partConfigurationState != null) ? partConfigurationState.IsValid : false;
 
-    var state = new 
+    var state = new
     {
         partNumber,
         valid,
@@ -337,16 +338,16 @@ public class MonitorAPI
         selections,
     };
 
-    string json = JsonSerializer.Serialize(state,  new 
-     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull 
+    string json = JsonSerializer.Serialize(state,  new
+     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     });
 
     return json;
   }
 
   public string webToConfigurationInstructions (string webConfigStateJSON, string sessionId, string partConfigurationStateJSON, string partNumberListJSON) {
-    
-    WebConfigurationState? webConfigState =  JsonSerializer.Deserialize<WebConfigurationState>(webConfigStateJSON, 
+
+    WebConfigurationState? webConfigState =  JsonSerializer.Deserialize<WebConfigurationState>(webConfigStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
@@ -356,7 +357,7 @@ public class MonitorAPI
 
     if (webConfigState != null) {
       if (webConfigState.values != null) {
-        foreach (string key in webConfigState.values.Keys) { 
+        foreach (string key in webConfigState.values.Keys) {
             var numericValue = webConfigState.values[key];
             string variableId = mapCodeToId.values.ContainsKey(key) ? (mapCodeToId.values[key] ?? "") : "";
             instructions.Add(
@@ -365,7 +366,7 @@ public class MonitorAPI
         }
       }
       if (webConfigState.texts != null) {
-        foreach (string key in webConfigState.texts.Keys) { 
+        foreach (string key in webConfigState.texts.Keys) {
             var textValue = webConfigState.texts[key];
             string variableId = mapCodeToId.texts.ContainsKey(key) ? (mapCodeToId.texts[key] ?? "") : "";
             instructions.Add(
@@ -374,7 +375,7 @@ public class MonitorAPI
         }
       }
       if (webConfigState.booleans != null) {
-        foreach (string key in webConfigState.booleans.Keys) { 
+        foreach (string key in webConfigState.booleans.Keys) {
             var booleanValue = webConfigState.booleans[key];
             string variableId = mapCodeToId.booleans.ContainsKey(key) ? (mapCodeToId.booleans[key] ?? "") : "";
             instructions.Add(
@@ -383,18 +384,18 @@ public class MonitorAPI
         }
       }
       if (webConfigState.selections != null) {
-        foreach (string key in webConfigState.selections.Keys) { 
+        foreach (string key in webConfigState.selections.Keys) {
             WebSelectionRowItem[] rowSelections = webConfigState.selections[key] ?? [];
             string selectionId = mapCodeToId.selectionGroups.ContainsKey(key) ? (mapCodeToId.selectionGroups[key] ?? "") : "";
-          
+
             var allRows = mapCodeToId.selectionGroupRowIds[key];
-            
+
             List<SelectionGroupRowUpdate> rowUnselectInstructions = new List<SelectionGroupRowUpdate>();
 
             // First - Add instruction to unselect all rows first
             for (int i = 0; i<allRows.Count; i++) {
               var row = allRows[i];
-              rowUnselectInstructions.Add(new SelectionGroupRowUpdate(row.Id, row.PartId, false, null)); 
+              rowUnselectInstructions.Add(new SelectionGroupRowUpdate(row.Id, row.PartId, false, null));
             }
 
             // Secondly - change rows that exist in web selection
@@ -413,17 +414,17 @@ public class MonitorAPI
         }
       }
     }
-    
+
     var configurationUpdate = new { SessionId = sessionId, Instructions = instructions };
-    string json = JsonSerializer.Serialize(configurationUpdate,  new 
-     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull 
+    string json = JsonSerializer.Serialize(configurationUpdate,  new
+     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     });
     return json;
   }
 
   public string getConfiguratorDefinition (string partConfigurationStateJSON, string partNumberListJSON) {
 
-    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON, 
+    PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
@@ -433,8 +434,8 @@ public class MonitorAPI
       appendMissingDataToPartConfigurationStateSection(partConfigurationState.Sections, partIdList ?? []);
     }
 
-    string json = JsonSerializer.Serialize(partConfigurationState,  new 
-     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull 
+    string json = JsonSerializer.Serialize(partConfigurationState,  new
+     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     });
 
     return json;
