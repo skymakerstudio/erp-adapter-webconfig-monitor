@@ -130,7 +130,7 @@ public class MonitorAPI
     if (partDef != null) {
       return partDef;
     } else {
-      throw new Exception();
+      throw new Exception("PartId " + partId + " missing in part list");
     }
   }
 
