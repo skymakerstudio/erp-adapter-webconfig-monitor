@@ -23,7 +23,7 @@ public record VariableState(
 public record SelectionGroupState(
   string Code,
   string Id,
-  SelectionGroupRowState[] Rows
+  List<SelectionGroupRowState> Rows
 );
 
 public record SelectionGroupRowState(
@@ -39,9 +39,9 @@ public record SelectionGroupRowState(
 
 public record SectionState (
   string Id,
-  VariableState[] Variables,
-  SelectionGroupState[] SelectionGroups,
-  SectionState[] Sections
+  List<VariableState> Variables,
+  List<SelectionGroupState> SelectionGroups,
+  List<SectionState> Sections
 );
 
 public record PartConfigurationState(
@@ -49,7 +49,7 @@ public record PartConfigurationState(
   bool IsValid,
   string PartId,
   decimal Quantity,
-  SectionState[] Sections
+  List<SectionState> Sections
 );
 
 
@@ -96,15 +96,15 @@ public record WebConfigurationIdMap (
 );
 
 // --------------------------------- Web configuration API ----------------------------------------
-public class WebValidationResult
- {
+// public class WebValidationResult
+//  {
 
-  public required string Id;
+//   public string? Id;
 
-  public required string Description;
+//   public string? Description;
 
-  public required string[] ErrorMessages;
-}
+//   public List<string>? ErrorMessages;
+// }
 
 public record WebSelectionRowItem (
   string selection,
@@ -117,7 +117,7 @@ public record WebConfigurationState(
     Dictionary<string, double> values,
     Dictionary<string, string> texts,
     Dictionary<string, bool> booleans,
-    Dictionary<string, WebSelectionRowItem[]> selections
+    Dictionary<string, List<WebSelectionRowItem>> selections
 );
 
 
@@ -126,7 +126,8 @@ public class MonitorAPI
 {
 
   private static PartNumberMap getPartFromPartId (string partId, List<PartNumberMap>? partNumberList) {
-    var partDef = (partNumberList ?? []).Find(item => item.Id == partId);
+    var emptyList = new List<PartNumberMap>();
+    var partDef = (partNumberList ?? emptyList).Find(item => item.Id == partId);
     if (partDef != null) {
       return partDef;
     } else {
@@ -134,18 +135,18 @@ public class MonitorAPI
     }
   }
 
-  private static List<VariableState> getAllVariablesFromSections (SectionState[] sections) {
+  private static List<VariableState> getAllVariablesFromSections (List<SectionState> sections) {
     List<VariableState> variables = new List<VariableState>();
-    for (int i = 0; i < sections.Length; i++) {
+    for (int i = 0; i < sections.Count; i++) {
       var section = sections[i];
       // section.Variables
-      for (int j = 0; j < section.Variables.Length; j++) {
+      for (int j = 0; j < section.Variables.Count; j++) {
         var currVar = section.Variables[j];
         variables.Add(currVar);
       }
 
       // Recursive fetch of sub sections content
-      if (section.Sections.Length > 0) {
+      if (section.Sections.Count > 0) {
         var subVariables = getAllVariablesFromSections(section.Sections);
         foreach (VariableState subVar in subVariables) {
           variables.Add(subVar);
@@ -156,18 +157,18 @@ public class MonitorAPI
     return variables;
   }
 
-  private static List<SelectionGroupState> getAllSelectionGroupsFromSections (SectionState[] sections) {
+  private static List<SelectionGroupState> getAllSelectionGroupsFromSections (List<SectionState> sections) {
     List<SelectionGroupState> selectionGroups = new List<SelectionGroupState>();
-    for (int i = 0; i < sections.Length; i++) {
+    for (int i = 0; i < sections.Count; i++) {
       var section = sections[i];
       // section.Variables
-      for (int j = 0; j < section.SelectionGroups.Length; j++) {
+      for (int j = 0; j < section.SelectionGroups.Count; j++) {
         var currVar = section.SelectionGroups[j];
         selectionGroups.Add(currVar);
       }
 
       // Recursive fetch of sub sections content
-      if (section.Sections.Length > 0) {
+      if (section.Sections.Count > 0) {
         var subGroups = getAllSelectionGroupsFromSections(section.Sections);
         foreach (SelectionGroupState subSelection in subGroups) {
           selectionGroups.Add(subSelection);
@@ -179,12 +180,12 @@ public class MonitorAPI
   }
 
   // Currently StateSelectionRow is missing the PartNumber and Description which has to be added
-  private static void appendMissingDataToPartConfigurationStateSection (SectionState[] sections, List<PartNumberMap> partIdList) {
+  private static void appendMissingDataToPartConfigurationStateSection (List<SectionState> sections, List<PartNumberMap> partIdList) {
 
-    for (int i = 0; i < sections.Length; i++) {
+    for (int i = 0; i < sections.Count; i++) {
       var section = sections[i];
       // section.Variables
-      for (int j = 0; j < section.SelectionGroups.Length; j++) {
+      for (int j = 0; j < section.SelectionGroups.Count; j++) {
         var group = section.SelectionGroups[j];
         foreach (SelectionGroupRowState row in group.Rows) {
           var part = getPartFromPartId(row.PartId, partIdList);
@@ -194,7 +195,7 @@ public class MonitorAPI
       }
 
       // Recursive append of missing sub sections content
-      if (section.Sections.Length > 0) {
+      if (section.Sections.Count > 0) {
         appendMissingDataToPartConfigurationStateSection(section.Sections, partIdList);
       }
 
@@ -215,7 +216,7 @@ public class MonitorAPI
     Dictionary<string, List<string>> selectionRowPartNumberToId = new Dictionary<string, List<string>>();
     Dictionary<string, List<RowPartIdMap>> selectionGroupRowIds = new Dictionary<string, List<RowPartIdMap>>();
 
-    var sections = partConfigurationState?.Sections ?? [];
+    var sections = partConfigurationState?.Sections ?? new List<SectionState>();
     var variablesInSections = getAllVariablesFromSections(sections);
 
     for (int i = 0; i<variablesInSections.Count; i++) {
@@ -236,7 +237,7 @@ public class MonitorAPI
       var currSection = selectionGroupsInSections[i];
       selectionGroupCodeToId.Add(currSection.Code, currSection.Id);
       List<RowPartIdMap> rowIdList = new List<RowPartIdMap>();
-      for (int j = 0; j<currSection.Rows.Length; j++) {
+      for (int j = 0; j<currSection.Rows.Count; j++) {
         var row = currSection.Rows[j];
         var partNumber = getPartFromPartId(row.PartId, partIdList).PartNumber;
 
@@ -282,12 +283,12 @@ public class MonitorAPI
         // };
     if (partConfigurationState != null) {
 
-      for (int i = 0; i < partConfigurationState.Sections.Length; i++)
+      for (int i = 0; i < partConfigurationState.Sections.Count; i++)
       {
 
         var section = partConfigurationState.Sections[i];
         if (section != null) {
-          for (int j = 0; j < section.Variables.Length; j++) {
+          for (int j = 0; j < section.Variables.Count; j++) {
             var secVariable = section.Variables[j];
             if (secVariable != null && secVariable.Value != null) {
               if ((secVariable.VariableType == 1) & (secVariable?.Value?.Type == 1) & (secVariable?.Value?.NumericValue != null)) {
@@ -300,15 +301,15 @@ public class MonitorAPI
             }
           }
 
-          for (int j = 0; j < section.SelectionGroups.Length; j++) {
+          for (int j = 0; j < section.SelectionGroups.Count; j++) {
             var selGroup = section.SelectionGroups[j];
             if (selGroup != null) {
               List<WebSelectionRowItem> selectedRows = new List<WebSelectionRowItem>();
 
-              for (int k = 0; k < selGroup.Rows.Length; k++) {
+              for (int k = 0; k < selGroup.Rows.Count; k++) {
                 var row = selGroup.Rows[k];
                 if (row.IsSelected) {
-                  var rowPartNumber = getPartFromPartId(row.PartId, partIdList ?? ([])).PartNumber;
+                  var rowPartNumber = getPartFromPartId(row.PartId, partIdList ?? (new List<PartNumberMap>())).PartNumber;
                   var webValue = new WebSelectionRowItem(rowPartNumber, row.Quantity);
                   selectedRows.Add(webValue);
                 }
@@ -324,7 +325,7 @@ public class MonitorAPI
     }
 
     var partId = (partConfigurationState != null) ? partConfigurationState.PartId : "";
-    var partNumber = getPartFromPartId(partId, partIdList ?? ([])).PartNumber;
+    var partNumber = getPartFromPartId(partId, partIdList ?? (new List<PartNumberMap>())).PartNumber;
 
     bool valid = (partConfigurationState != null) ? partConfigurationState.IsValid : false;
 
@@ -385,7 +386,8 @@ public class MonitorAPI
       }
       if (webConfigState.selections != null) {
         foreach (string key in webConfigState.selections.Keys) {
-            WebSelectionRowItem[] rowSelections = webConfigState.selections[key] ?? [];
+            
+            List<WebSelectionRowItem> rowSelections = webConfigState.selections[key] ?? new List<WebSelectionRowItem>();
             string selectionId = mapCodeToId.selectionGroups.ContainsKey(key) ? (mapCodeToId.selectionGroups[key] ?? "") : "";
 
             var allRows = mapCodeToId.selectionGroupRowIds[key];
@@ -401,8 +403,9 @@ public class MonitorAPI
             // Secondly - change rows that exist in web selection
             List<SelectionGroupRowUpdate> rowUpdateInstructions = new List<SelectionGroupRowUpdate>();
             foreach (SelectionGroupRowUpdate rowUpdateInstruction in rowUnselectInstructions) {
-              var rowToSelect = Array.Find(rowSelections, item => {
-                List<string> possibleRowIds = mapCodeToId.selectionRows[item.selection];
+              
+              var rowToSelect = rowSelections.Find(rowSelections => {
+                List<string> possibleRowIds = mapCodeToId.selectionRows[rowSelections.selection];
                 return possibleRowIds.Contains(rowUpdateInstruction.SelectionGroupRowId);
               });
               var rowInstruction = rowUpdateInstruction;
@@ -431,7 +434,8 @@ public class MonitorAPI
     List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
     if (partConfigurationState != null) {
-      appendMissingDataToPartConfigurationStateSection(partConfigurationState.Sections, partIdList ?? []);
+      var emptyList = new List<PartNumberMap>();
+      appendMissingDataToPartConfigurationStateSection(partConfigurationState.Sections, partIdList ?? emptyList);
     }
 
     string json = JsonSerializer.Serialize(partConfigurationState,  new

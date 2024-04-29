@@ -32,7 +32,7 @@ public class MonitorTests
           ["nHoles"] = 64,
         },
         texts = new Dictionary<string, string>(),
-        selections = new Dictionary<string, WebSelectionRowItem[]>(){
+        selections = new Dictionary<string, List<WebSelectionRowItem>>(){
           ["HoleType1"] = [new WebSelectionRowItem("Rect", 1)]
         }
       };
@@ -60,7 +60,7 @@ public class MonitorTests
           ["Width"] = 100,
           ["Depth"] = 100,
         },
-        selections = new Dictionary<string, WebSelectionRowItem[]>(){
+        selections = new Dictionary<string, List<WebSelectionRowItem>>(){
           ["HoleType1"] = [new WebSelectionRowItem("Hex", 1)]
         }
       };
@@ -122,7 +122,7 @@ public class MonitorTests
         partNumber = "ConfigurablePlate1",
         valid = true,
         values = new Dictionary<string, double>(){},
-        selections = new Dictionary<string, WebSelectionRowItem[]>(){
+        selections = new Dictionary<string, List<WebSelectionRowItem>>(){
           ["HoleType1"] = [new WebSelectionRowItem("Hex", 1)],
           ["HoleType2"] = [new WebSelectionRowItem("Hex", 1)]
         }
@@ -194,12 +194,11 @@ public class MonitorTests
           ["nHoles"] = 64,
         },
         texts = new Dictionary<string, string>(),
-        selections = new Dictionary<string, WebSelectionRowItem[]>(){
+        selections = new Dictionary<string, List<WebSelectionRowItem>>(){
           ["HoleType1"] = [new WebSelectionRowItem("Rect", 1)]
         }
       };
-      var expectedResult = JsonSerializer.Serialize(partExpectedState1,  new
-     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+      var expectedResult = JsonSerializer.Serialize(partExpectedState1, new JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     });
 
       var partReferenceIndex = result.IndexOf("partId");

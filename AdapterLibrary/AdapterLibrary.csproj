@@ -7,7 +7,7 @@
     <Description>
       Web adapter for product configuration with Monitor G5 API
     </Description>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
