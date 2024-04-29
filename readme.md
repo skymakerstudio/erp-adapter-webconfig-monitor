@@ -37,9 +37,9 @@ To use this library, include the AdapterLibrary in your project.
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
-string partConfigState = postRequestTo(monitorApiUrl + "Common/PartConfigurations/Get", args);
+string partConfigState = PostRequestTo(monitorApiUrl + "Common/PartConfigurations/Get", args);
 
-var partNumbers = postRequestTo(monitorApiUrl + "Inventory/Parts?$select=Id,PartNumber", args);
+var partNumbers = GetRequestTo(monitorApiUrl + "Inventory/Parts?$select=Id,PartNumber", args);
 
 string resultAsJsonString = adapter.configurationToWeb(partConfigState, partNumbers);
 ```
@@ -99,13 +99,13 @@ AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
 const serielizedJson = """{"partNumber":"ConfigurablePlate1","values":{"width":123,"depth":456},"texts":{"marking":"PG2400A"},"selections":{"thickness":["T1_5"]}}""";
 
-string partConfigState = postRequestTo(monitorApiUrl + "Common/PartConfigurations/Get");
+string partConfigState = PostRequestTo(monitorApiUrl + "Common/PartConfigurations/Get");
 
-var partNumbers = postRequestTo(monitorApiUrl + "Inventory/Parts?$select=Id,PartNumber");
+var partNumbers = GetRequestTo(monitorApiUrl + "Inventory/Parts?$select=Id,PartNumber");
 
 string instructionsAsJson = adapter.webToConfigurationInstructions(serielizedJson, sessionId, partConfigStateResponse, partNumbersResponse);
 
-string partConfigStateAfterUpdate = postRequestTo(monitorApiUrl + "/Common/PartConfigurations/Update", instructionsAsJson)
+string partConfigStateAfterUpdate = PostRequestTo(monitorApiUrl + "/Common/PartConfigurations/Update", instructionsAsJson)
 ```
 
 ## Get G5 configurator definition to web for synchronization (pseudo code) ([see Monitor API docs](https://api.monitor.se/api/Monitor.API.Common.Commands.PartConfigurations.GetPartConfiguration.html))
@@ -113,10 +113,10 @@ string partConfigStateAfterUpdate = postRequestTo(monitorApiUrl + "/Common/PartC
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
-string partConfigState = postRequestTo(monitorApiUrl + "Common/PartConfigurations/Get", args);
+string partConfigState = PostRequestTo(monitorApiUrl + "Common/PartConfigurations/Get", args);
 
 // Description included for use with SelectionGroup row labels
-var partNumbersWithDescriptions = postRequestTo(monitorApiUrl + "Inventory/Parts?$select=Id,PartNumber,Description", args);
+var partNumbersWithDescriptions = GetRequestTo(monitorApiUrl + "Inventory/Parts?$select=Id,PartNumber,Description", args);
 
 string augmentedPartConfigurationState = adapter.getConfiguratorDefinition(partConfigState, partNumbersWithDescriptions);
 ```
