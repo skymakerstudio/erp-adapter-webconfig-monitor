@@ -10,7 +10,6 @@ To use this library, include the AdapterLibrary in your project.
 ```json
 {
   "partNumber": "ConfigurablePlate1",
-  "valid": true,
   "values": {
     "width": 100,
     "depth": 100
