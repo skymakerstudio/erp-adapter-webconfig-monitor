@@ -5,6 +5,11 @@ dependencies on internal GUID references that tend to change with version in the
 
 To use this library, include the AdapterLibrary in your project.
 
+# Net 6 and 8 
+The maste is run in C# 8
+There is also a branch for C# 6 available https://github.com/skymakerstudio/erp-adapter-webconfig-monitor/tree/net6
+
+
 ## Example of input/output data structure for the simplified web API
 
 ```json
