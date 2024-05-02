@@ -16,7 +16,6 @@ There is also a branch for C# 6 available [net6](https://github.com/skymakerstud
 ```json
 {
   "partNumber": "ConfigurablePlate1",
-  "valid": true,
   "values": {
     "width": 100,
     "depth": 100
