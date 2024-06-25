@@ -37,7 +37,7 @@ public record SelectionGroupRowState(
   public string? Description { get; set; } // Not part of standard response
 };
 
-public record SectionState (
+public record SectionState(
   string Id,
   List<VariableState> Variables,
   List<SelectionGroupState> SelectionGroups,
@@ -75,18 +75,18 @@ public record SelectionGroupRowUpdate(
 
 // ------------------------------ Maps & Helper records -------------------------------------------------
 
-public record PartNumberMap (
+public record PartNumberMap(
   string Id,
   string PartNumber,
   string? Description
 );
 
-public record RowPartIdMap (
+public record RowPartIdMap(
   string Id,
   string PartId
 );
 
-public record WebConfigurationIdMap (
+public record WebConfigurationIdMap(
   Dictionary<string, string> values,
   Dictionary<string, string> texts,
   Dictionary<string, string> booleans,
@@ -106,7 +106,7 @@ public record WebConfigurationIdMap (
 //   public List<string>? ErrorMessages;
 // }
 
-public record WebSelectionRowItem (
+public record WebSelectionRowItem(
   string selection,
   decimal quantity
 );
@@ -125,30 +125,39 @@ public record WebConfigurationState(
 public class MonitorAPI
 {
 
-  private static PartNumberMap getPartFromPartId (string partId, List<PartNumberMap>? partNumberList) {
+  private static PartNumberMap getPartFromPartId(string partId, List<PartNumberMap>? partNumberList)
+  {
     var emptyList = new List<PartNumberMap>();
     var partDef = (partNumberList ?? emptyList).Find(item => item.Id == partId);
-    if (partDef != null) {
+    if (partDef != null)
+    {
       return partDef;
-    } else {
+    }
+    else
+    {
       throw new Exception();
     }
   }
 
-  private static List<VariableState> getAllVariablesFromSections (List<SectionState> sections) {
+  private static List<VariableState> getAllVariablesFromSections(List<SectionState> sections)
+  {
     List<VariableState> variables = new List<VariableState>();
-    for (int i = 0; i < sections.Count; i++) {
+    for (int i = 0; i < sections.Count; i++)
+    {
       var section = sections[i];
       // section.Variables
-      for (int j = 0; j < section.Variables.Count; j++) {
+      for (int j = 0; j < section.Variables.Count; j++)
+      {
         var currVar = section.Variables[j];
         variables.Add(currVar);
       }
 
       // Recursive fetch of sub sections content
-      if (section.Sections.Count > 0) {
+      if (section.Sections.Count > 0)
+      {
         var subVariables = getAllVariablesFromSections(section.Sections);
-        foreach (VariableState subVar in subVariables) {
+        foreach (VariableState subVar in subVariables)
+        {
           variables.Add(subVar);
         }
       }
@@ -157,20 +166,25 @@ public class MonitorAPI
     return variables;
   }
 
-  private static List<SelectionGroupState> getAllSelectionGroupsFromSections (List<SectionState> sections) {
+  private static List<SelectionGroupState> getAllSelectionGroupsFromSections(List<SectionState> sections)
+  {
     List<SelectionGroupState> selectionGroups = new List<SelectionGroupState>();
-    for (int i = 0; i < sections.Count; i++) {
+    for (int i = 0; i < sections.Count; i++)
+    {
       var section = sections[i];
       // section.Variables
-      for (int j = 0; j < section.SelectionGroups.Count; j++) {
+      for (int j = 0; j < section.SelectionGroups.Count; j++)
+      {
         var currVar = section.SelectionGroups[j];
         selectionGroups.Add(currVar);
       }
 
       // Recursive fetch of sub sections content
-      if (section.Sections.Count > 0) {
+      if (section.Sections.Count > 0)
+      {
         var subGroups = getAllSelectionGroupsFromSections(section.Sections);
-        foreach (SelectionGroupState subSelection in subGroups) {
+        foreach (SelectionGroupState subSelection in subGroups)
+        {
           selectionGroups.Add(subSelection);
         }
       }
@@ -180,14 +194,18 @@ public class MonitorAPI
   }
 
   // Currently StateSelectionRow is missing the PartNumber and Description which has to be added
-  private static void appendMissingDataToPartConfigurationStateSection (List<SectionState> sections, List<PartNumberMap> partIdList) {
+  private static void appendMissingDataToPartConfigurationStateSection(List<SectionState> sections, List<PartNumberMap> partIdList)
+  {
 
-    for (int i = 0; i < sections.Count; i++) {
+    for (int i = 0; i < sections.Count; i++)
+    {
       var section = sections[i];
       // section.Variables
-      for (int j = 0; j < section.SelectionGroups.Count; j++) {
+      for (int j = 0; j < section.SelectionGroups.Count; j++)
+      {
         var group = section.SelectionGroups[j];
-        foreach (SelectionGroupRowState row in group.Rows) {
+        foreach (SelectionGroupRowState row in group.Rows)
+        {
           var part = getPartFromPartId(row.PartId, partIdList);
           row.PartNumber = part.PartNumber;
           row.Description = part.Description;
@@ -195,19 +213,21 @@ public class MonitorAPI
       }
 
       // Recursive append of missing sub sections content
-      if (section.Sections.Count > 0) {
+      if (section.Sections.Count > 0)
+      {
         appendMissingDataToPartConfigurationStateSection(section.Sections, partIdList);
       }
 
     }
   }
 
-  public WebConfigurationIdMap generateCodeToIdMaps (string partConfigurationStateJSON, string partNumberListJSON) {
+  public WebConfigurationIdMap generateCodeToIdMaps(string partConfigurationStateJSON, string partNumberListJSON)
+  {
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
+    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General)); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
     Dictionary<string, string> valueNameToId = new Dictionary<string, string>();
     Dictionary<string, string> textNameToId = new Dictionary<string, string>();
@@ -219,35 +239,45 @@ public class MonitorAPI
     var sections = partConfigurationState?.Sections ?? new List<SectionState>();
     var variablesInSections = getAllVariablesFromSections(sections);
 
-    for (int i = 0; i<variablesInSections.Count; i++) {
+    for (int i = 0; i < variablesInSections.Count; i++)
+    {
       var currVar = variablesInSections[i];
-      if (currVar.VariableType == 0) { // string
+      if (currVar.VariableType == 0)
+      { // string
         textNameToId.Add(currVar.Name, currVar.Id);
-      } else if (currVar.VariableType == 1) { // number
+      }
+      else if (currVar.VariableType == 1)
+      { // number
         valueNameToId.Add(currVar.Name, currVar.Id);
-      } else if (currVar.VariableType == 3) { // boolean
+      }
+      else if (currVar.VariableType == 3)
+      { // boolean
         booleanNameToId.Add(currVar.Name, currVar.Id);
-      } else {
+      }
+      else
+      {
         // todo: Handle Date and unkown
       }
     }
 
     var selectionGroupsInSections = getAllSelectionGroupsFromSections(sections);
-    for (int i = 0; i<selectionGroupsInSections.Count; i++) {
+    for (int i = 0; i < selectionGroupsInSections.Count; i++)
+    {
       var currSection = selectionGroupsInSections[i];
       selectionGroupCodeToId.Add(currSection.Code, currSection.Id);
       List<RowPartIdMap> rowIdList = new List<RowPartIdMap>();
-      for (int j = 0; j<currSection.Rows.Count; j++) {
+      for (int j = 0; j < currSection.Rows.Count; j++)
+      {
         var row = currSection.Rows[j];
         var partNumber = getPartFromPartId(row.PartId, partIdList).PartNumber;
 
         if (selectionRowPartNumberToId.ContainsKey(partNumber))
         {
-            selectionRowPartNumberToId[partNumber].Add(row.Id);
+          selectionRowPartNumberToId[partNumber].Add(row.Id);
         }
         else
         {
-            selectionRowPartNumberToId[partNumber] = new List<string>() { row.Id };
+          selectionRowPartNumberToId[partNumber] = new List<string>() { row.Id };
         }
 
         rowIdList.Add(new RowPartIdMap(row.Id, row.PartId));
@@ -266,49 +296,61 @@ public class MonitorAPI
     return map;
   }
 
-  public string configurationToWeb (string partConfigurationStateJSON, string partNumberListJSON) {
+  public string configurationToWeb(string partConfigurationStateJSON, string partNumberListJSON)
+  {
 
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
+    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General)); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
 
     var values = new Dictionary<string, double>();
     var texts = new Dictionary<string, string>();
     var selections = new Dictionary<string, List<WebSelectionRowItem>>();
-        // {
-        //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
-        // };
-    if (partConfigurationState != null) {
+    // {
+    //   { "Width", new WebVariableState("707434600696463128", "Width", 100) },
+    // };
+    if (partConfigurationState != null)
+    {
 
       for (int i = 0; i < partConfigurationState.Sections.Count; i++)
       {
 
         var section = partConfigurationState.Sections[i];
-        if (section != null) {
-          for (int j = 0; j < section.Variables.Count; j++) {
+        if (section != null)
+        {
+          for (int j = 0; j < section.Variables.Count; j++)
+          {
             var secVariable = section.Variables[j];
-            if (secVariable != null && secVariable.Value != null) {
-              if ((secVariable.VariableType == 1) & (secVariable?.Value?.Type == 1) & (secVariable?.Value?.NumericValue != null)) {
+            if (secVariable != null && secVariable.Value != null)
+            {
+              if ((secVariable.VariableType == 1) & (secVariable?.Value?.Type == 1) & (secVariable?.Value?.NumericValue != null))
+              {
                 double value = secVariable?.Value?.NumericValue ?? 0;
                 string name = secVariable?.Name ?? "Undefined";
                 values.Add(name, value);
-              } else {
+              }
+              else
+              {
                 // todo: Add String to texts and Date to dates
               }
             }
           }
 
-          for (int j = 0; j < section.SelectionGroups.Count; j++) {
+          for (int j = 0; j < section.SelectionGroups.Count; j++)
+          {
             var selGroup = section.SelectionGroups[j];
-            if (selGroup != null) {
+            if (selGroup != null)
+            {
               List<WebSelectionRowItem> selectedRows = new List<WebSelectionRowItem>();
 
-              for (int k = 0; k < selGroup.Rows.Count; k++) {
+              for (int k = 0; k < selGroup.Rows.Count; k++)
+              {
                 var row = selGroup.Rows[k];
-                if (row.IsSelected) {
+                if (row.IsSelected)
+                {
                   var rowPartNumber = getPartFromPartId(row.PartId, partIdList ?? (new List<PartNumberMap>())).PartNumber;
                   var webValue = new WebSelectionRowItem(rowPartNumber, row.Quantity);
                   selectedRows.Add(webValue);
@@ -316,7 +358,7 @@ public class MonitorAPI
               }
 
               selections.Add(selGroup.Code, selectedRows);
-                // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
+              // var value = (sectionVariable.Value.NumericValue != null) ? sectionVariable.Value.NumericValue : 0;
 
             }
           }
@@ -331,24 +373,27 @@ public class MonitorAPI
 
     var state = new
     {
-        partNumber,
-        valid,
-        // quantity = 1,
-        values,
-        texts,
-        selections,
+      partNumber,
+      valid,
+      // quantity = 1,
+      values,
+      texts,
+      selections,
     };
 
-    string json = JsonSerializer.Serialize(state,  new
-     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    string json = JsonSerializer.Serialize(state, new
+     System.Text.Json.JsonSerializerOptions()
+    {
+      DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     });
 
     return json;
   }
 
-  public string webToConfigurationInstructions (string webConfigStateJSON, string sessionId, string partConfigurationStateJSON, string partNumberListJSON) {
+  public string webToConfigurationInstructions(string webConfigStateJSON, string sessionId, string partConfigurationStateJSON, string partNumberListJSON)
+  {
 
-    WebConfigurationState? webConfigState =  JsonSerializer.Deserialize<WebConfigurationState>(webConfigStateJSON,
+    WebConfigurationState? webConfigState = JsonSerializer.Deserialize<WebConfigurationState>(webConfigStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
@@ -356,90 +401,109 @@ public class MonitorAPI
 
     var instructions = new List<UpdatePartConfigurationInstruction>();
 
-    if (webConfigState != null) {
-      if (webConfigState.values != null) {
-        foreach (string key in webConfigState.values.Keys) {
-            var numericValue = webConfigState.values[key];
-            string variableId = mapCodeToId.values.ContainsKey(key) ? (mapCodeToId.values[key] ?? "") : "";
-            instructions.Add(
-              new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(1, null, null, numericValue, null)), null)
-            );
+    if (webConfigState != null)
+    {
+      if (webConfigState.values != null)
+      {
+        foreach (string key in webConfigState.values.Keys)
+        {
+          var numericValue = webConfigState.values[key];
+          string variableId = mapCodeToId.values.ContainsKey(key) ? (mapCodeToId.values[key] ?? "") : "";
+          instructions.Add(
+            new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId, new VariableValue(1, null, null, numericValue, null)), null)
+          );
         }
       }
-      if (webConfigState.texts != null) {
-        foreach (string key in webConfigState.texts.Keys) {
-            var textValue = webConfigState.texts[key];
-            string variableId = mapCodeToId.texts.ContainsKey(key) ? (mapCodeToId.texts[key] ?? "") : "";
-            instructions.Add(
-              new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(0, textValue, null, null, null)), null)
-            );
+      if (webConfigState.texts != null)
+      {
+        foreach (string key in webConfigState.texts.Keys)
+        {
+          var textValue = webConfigState.texts[key];
+          string variableId = mapCodeToId.texts.ContainsKey(key) ? (mapCodeToId.texts[key] ?? "") : "";
+          instructions.Add(
+            new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId, new VariableValue(0, textValue, null, null, null)), null)
+          );
         }
       }
-      if (webConfigState.booleans != null) {
-        foreach (string key in webConfigState.booleans.Keys) {
-            var booleanValue = webConfigState.booleans[key];
-            string variableId = mapCodeToId.booleans.ContainsKey(key) ? (mapCodeToId.booleans[key] ?? "") : "";
-            instructions.Add(
-              new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId,  new VariableValue(0, null, booleanValue, null, null)), null)
-            );
+      if (webConfigState.booleans != null)
+      {
+        foreach (string key in webConfigState.booleans.Keys)
+        {
+          var booleanValue = webConfigState.booleans[key];
+          string variableId = mapCodeToId.booleans.ContainsKey(key) ? (mapCodeToId.booleans[key] ?? "") : "";
+          instructions.Add(
+            new UpdatePartConfigurationInstruction(0, new VariableUpdate(variableId, new VariableValue(0, null, booleanValue, null, null)), null)
+          );
         }
       }
-      if (webConfigState.selections != null) {
-        foreach (string key in webConfigState.selections.Keys) {
-            
-            List<WebSelectionRowItem> rowSelections = webConfigState.selections[key] ?? new List<WebSelectionRowItem>();
-            string selectionId = mapCodeToId.selectionGroups.ContainsKey(key) ? (mapCodeToId.selectionGroups[key] ?? "") : "";
+      if (webConfigState.selections != null)
+      {
+        foreach (string key in webConfigState.selections.Keys)
+        {
 
-            var allRows = mapCodeToId.selectionGroupRowIds[key];
+          List<WebSelectionRowItem> rowSelections = webConfigState.selections[key] ?? new List<WebSelectionRowItem>();
+          string selectionId = mapCodeToId.selectionGroups.ContainsKey(key) ? (mapCodeToId.selectionGroups[key] ?? "") : "";
 
-            List<SelectionGroupRowUpdate> rowUnselectInstructions = new List<SelectionGroupRowUpdate>();
+          var allRows = mapCodeToId.selectionGroupRowIds[key];
 
-            // First - Add instruction to unselect all rows first
-            for (int i = 0; i<allRows.Count; i++) {
-              var row = allRows[i];
-              rowUnselectInstructions.Add(new SelectionGroupRowUpdate(row.Id, row.PartId, false, null));
+          List<SelectionGroupRowUpdate> rowUnselectInstructions = new List<SelectionGroupRowUpdate>();
+
+          // First - Add instruction to unselect all rows first
+          for (int i = 0; i < allRows.Count; i++)
+          {
+            var row = allRows[i];
+            rowUnselectInstructions.Add(new SelectionGroupRowUpdate(row.Id, row.PartId, false, null));
+          }
+
+          // Secondly - change rows that exist in web selection
+          List<SelectionGroupRowUpdate> rowUpdateInstructions = new List<SelectionGroupRowUpdate>();
+          foreach (SelectionGroupRowUpdate rowUpdateInstruction in rowUnselectInstructions)
+          {
+
+            var rowToSelect = rowSelections.Find(rowSelections =>
+            {
+              List<string> possibleRowIds = mapCodeToId.selectionRows[rowSelections.selection];
+              return possibleRowIds.Contains(rowUpdateInstruction.SelectionGroupRowId);
+            });
+            var rowInstruction = rowUpdateInstruction;
+            if (rowToSelect != null)
+            {
+              rowInstruction = new SelectionGroupRowUpdate(rowUpdateInstruction.SelectionGroupRowId, rowUpdateInstruction.PartId, true, rowToSelect.quantity);
             }
-
-            // Secondly - change rows that exist in web selection
-            List<SelectionGroupRowUpdate> rowUpdateInstructions = new List<SelectionGroupRowUpdate>();
-            foreach (SelectionGroupRowUpdate rowUpdateInstruction in rowUnselectInstructions) {
-              
-              var rowToSelect = rowSelections.Find(rowSelections => {
-                List<string> possibleRowIds = mapCodeToId.selectionRows[rowSelections.selection];
-                return possibleRowIds.Contains(rowUpdateInstruction.SelectionGroupRowId);
-              });
-              var rowInstruction = rowUpdateInstruction;
-              if (rowToSelect != null) {
-                rowInstruction = new SelectionGroupRowUpdate(rowUpdateInstruction.SelectionGroupRowId, rowUpdateInstruction.PartId, true, rowToSelect.quantity);
-              }
-              instructions.Add(new UpdatePartConfigurationInstruction(1, null, rowInstruction));
-            }
+            instructions.Add(new UpdatePartConfigurationInstruction(1, null, rowInstruction));
+          }
         }
       }
     }
 
     var configurationUpdate = new { SessionId = sessionId, Instructions = instructions };
-    string json = JsonSerializer.Serialize(configurationUpdate,  new
-     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    string json = JsonSerializer.Serialize(configurationUpdate, new
+     System.Text.Json.JsonSerializerOptions()
+    {
+      DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     });
     return json;
   }
 
-  public string getConfiguratorDefinition (string partConfigurationStateJSON, string partNumberListJSON) {
+  public string getConfiguratorDefinition(string partConfigurationStateJSON, string partNumberListJSON)
+  {
 
     PartConfigurationState? partConfigurationState = JsonSerializer.Deserialize<PartConfigurationState>(partConfigurationStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
-    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General) ); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
+    List<PartNumberMap>? partIdList = JsonSerializer.Deserialize<List<PartNumberMap>>(partNumberListJSON, new JsonSerializerOptions(JsonSerializerDefaults.General)); // todo: Replace when $expand is suppoted for PartNumber on PartConfigurationState (issue submitted to support)
 
-    if (partConfigurationState != null) {
+    if (partConfigurationState != null)
+    {
       var emptyList = new List<PartNumberMap>();
       appendMissingDataToPartConfigurationStateSection(partConfigurationState.Sections, partIdList ?? emptyList);
     }
 
-    string json = JsonSerializer.Serialize(partConfigurationState,  new
-     System.Text.Json.JsonSerializerOptions()  { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    string json = JsonSerializer.Serialize(partConfigurationState, new
+     System.Text.Json.JsonSerializerOptions()
+    {
+      DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     });
 
     return json;
