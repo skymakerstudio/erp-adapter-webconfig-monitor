@@ -135,7 +135,7 @@ public class MonitorAPI
     }
     else
     {
-      throw new Exception();
+      return new PartNumberMap(partId, "Missing", "Missing from part list");
     }
   }
 
