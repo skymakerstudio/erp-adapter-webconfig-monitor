@@ -5,10 +5,12 @@ dependencies on internal GUID references that tend to change with version in the
 
 To use this library, include the AdapterLibrary in your project.
 
-# Net 6 and 8 
-The maste is run in C# 8.
+Use either with partial update of webToConfigurationInstructions if **full sales configurator in Monitor** or full update of webToConfigurationInstructions if its a **minimal product configurator in monitor**. See FAQ below for more details on this.
 
-There is also a branch for C# 6 available [net6](https://github.com/skymakerstudio/erp-adapter-webconfig-monitor/tree/net6)
+# Net 6 and 8 
+The maste is written in C# 8.
+
+There is also a branch with C# 6 available [net6](https://github.com/skymakerstudio/erp-adapter-webconfig-monitor/tree/net6)
 
 
 ## Example of input/output data structure for the simplified web API
@@ -102,13 +104,13 @@ string resultAsJsonString = adapter.configurationToWeb(partConfigState, partNumb
 ```C#
 AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
 
-const serielizedJson = """{"partNumber":"ConfigurablePlate1","values":{"width":123,"depth":456},"texts":{"marking":"PG2400A"},"selections":{"thickness":["T1_5"]}}""";
+const partialJson = """{"partNumber":"ConfigurablePlate1","values":{"width":123,"depth":456},"texts":{"marking":"PG2400A"},"selections":{"thickness":["T1_5"]}}""";
 
 string partConfigState = PostRequestTo(monitorApiUrl + "Common/PartConfigurations/Get");
 
 var partNumbers = GetRequestTo(monitorApiUrl + "Inventory/Parts?$select=Id,PartNumber");
 
-string instructionsAsJson = adapter.webToConfigurationInstructions(serielizedJson, sessionId, partConfigStateResponse, partNumbersResponse);
+string instructionsAsJson = adapter.webToConfigurationInstructions(partialJson, sessionId, partConfigStateResponse, partNumbersResponse);
 
 string partConfigStateAfterUpdate = PostRequestTo(monitorApiUrl + "/Common/PartConfigurations/Update", instructionsAsJson)
 ```
@@ -152,3 +154,13 @@ A fresh `PartConfigurationState`, together with a part number list, works as a d
 
 Instead of sending lots of data every time an update is done, the important data for structure can be handled via the
 definition. While actual inputs and outputs only contain data that should change.
+
+### Should I return every value and selection group or just what has been changed?
+
+Since Monitor G5 is computing and validating everything side and returns the result you have two alternatives when you set up the ERP adapter:
+
+1. **Full sales configurator in monitor.**
+Do a partial update of webToConfigurationInstructions(partialJson) and react to the results. Use this pattern when you have all the rules in Monitor G5 and need a result every time something is changed by the user. User updates input X-> webToConfigurationInstructions(X) -> result from monitor -> Update UI + Visualization
+
+2. **Minimal configurator in Monitor.** Do a full update to webToConfigurationInstructions and expect the configuration to be completed. Use this pattern when you have some or all rules outside Monitor G5 and just need to "fill in" the fields in a Monitor G5 to enable manufacturing preparations.
+

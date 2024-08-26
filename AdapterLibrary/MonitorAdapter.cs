@@ -389,10 +389,10 @@ public class MonitorAPI
     return json;
   }
 
-  public string webToConfigurationInstructions(string webConfigStateJSON, string sessionId, string partConfigurationStateJSON, string partNumberListJSON)
+  public string webToConfigurationInstructions(string partialWebConfigStateJSON, string sessionId, string partConfigurationStateJSON, string partNumberListJSON)
   {
 
-    WebConfigurationState? webConfigState = JsonSerializer.Deserialize<WebConfigurationState>(webConfigStateJSON,
+    WebConfigurationState? webConfigState = JsonSerializer.Deserialize<WebConfigurationState>(partialWebConfigStateJSON,
       new JsonSerializerOptions(JsonSerializerDefaults.General)
     );
 
