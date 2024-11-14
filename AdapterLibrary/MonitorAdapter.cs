@@ -23,7 +23,8 @@ public record VariableState(
 public record SelectionGroupState(
   string Code,
   string Id,
-  SelectionGroupRowState[] Rows
+  SelectionGroupRowState[] Rows,
+  SelectionGroupState[]? SelectionGroups
 );
 
 public record SelectionGroupRowState(
@@ -164,7 +165,25 @@ public class MonitorAPI
     }
     return variables;
   }
+  private static List<SelectionGroupState> getAllSelectionGroupsFromSelectionGroup(SelectionGroupState[] selectionGroups)
+  {
+    List<SelectionGroupState> flatListOfSelectionGroups = new List<SelectionGroupState>();
+    for (int j = 0; j < selectionGroups.Count(); j++)
+    {
+      var currVar = selectionGroups[j];
+      flatListOfSelectionGroups.Add(currVar);
+      if (currVar.SelectionGroups?.Count() > 0)
+      {
+        var subGroup = getAllSelectionGroupsFromSelectionGroup(currVar.SelectionGroups);
+        for (int m = 0; m < subGroup.Count; m++)
+        {
+          flatListOfSelectionGroups.Add(subGroup[m]);
+        }
+      }
+    }
 
+    return flatListOfSelectionGroups;
+  }
   private static List<SelectionGroupState> getAllSelectionGroupsFromSections(SectionState[] sections)
   {
     List<SelectionGroupState> selectionGroups = new List<SelectionGroupState>();
@@ -172,10 +191,10 @@ public class MonitorAPI
     {
       var section = sections[i];
       // section.Variables
-      for (int j = 0; j < section.SelectionGroups.Length; j++)
+      var groups = getAllSelectionGroupsFromSelectionGroup(section.SelectionGroups);
+      for (int j = 0; j < groups.Count; j++)
       {
-        var currVar = section.SelectionGroups[j];
-        selectionGroups.Add(currVar);
+        selectionGroups.Add(groups[j]);
       }
 
       // Recursive fetch of sub sections content
