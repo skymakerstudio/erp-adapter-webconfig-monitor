@@ -1,4 +1,4 @@
-# Monitor G5 ERP - Web adapter for PartConfigration
+# Monitor G5 ERP - Web adapter for PartConfiguration
 
 This library simplifies working with complex data structures for the Monitor G5 API in a web context. It also eliminates
 dependencies on internal GUID references that tend to change with version in the G5 API.
