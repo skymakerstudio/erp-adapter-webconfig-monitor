@@ -185,6 +185,59 @@ public class MonitorTests
   }
 
   [TestMethod]
+  public void TestWebToG5_EmptySelection()
+  {
+    var All_Parts_Response = """[{"Id":"707433796463833993","PartNumber":"ConfigurablePlate1"},{"Id":"707435321177219946","PartNumber":"Rect"},{"Id":"707435482238493977","PartNumber":"Hex"},{"Id":"993513117160949618","PartNumber":"NoHole"}]""";
+    var PartConfigurationState_Response = """{"$id":"1","SessionId":"b6ee6341-92ed-483a-85f4-73180bc04c59","ExpiresAt":"2020-01-18T20:55:31.9725877+02:00","CustomerId":"547575408285834014","Comment":null,"PartConfigurationTemplateSnapshotId":"993518285080342797","PartConfigurationTemplateId":"707434354809585488","PartConfigurationTemplateVersion":11,"PartConfigurationId":"1113532685951609556","IsValid":true,"AlternativePreparationCode":"","DiscountPercentage":0,"LockedDiscount":false,"LockedUnitPrice":false,"PartId":"707433796463833993","PriceFormulaFactor":0.01,"Quantity":1.0,"StandardPrice":{"$id":"2","Amount":0,"CurrencyId":"2"},"UnitPrice":{"$id":"3","Amount":0,"CurrencyId":"2"},"UnitPriceInCompanyCurrency":{"$id":"4","Amount":0,"CurrencyId":"2"},"WeightPerUnit":0,"Sections":[{"$id":"5","Id":"993518285080342789","Description":"Design","Comment":null,"Visible":true,"Sections":[],"Variables":[],"SelectionGroups":[{"$id":"31","Id":"993518285080342907","CanEditSelectedQuantity":false,"Code":"HoleType1","Comment":null,"Description":"Hole shape","MaximumSelectedQuantity":null,"MaximumSelectedRows":1,"MinimumSelectedQuantity":null,"MinimumSelectedRows":1,"RowIndex":3,"Rows":[{"$id":"32","AlternativePreparationCode":null,"AutoCompleteConfigurationId":null,"Comment":null,"DefaultQuantity":1,"ExtraPercent":0,"HasSelections":false,"Id":"993518285080342908","CloneId":0,"Instruction":null,"IsDefaultSettings":false,"IsForCalculationOnly":false,"MainPartId":null,"MaxQuantity":1,"MinQuantity":1,"PartId":"707435321177219946","Position":null,"QuantityFormula":null,"RowIndex":0,"SetupQuantity":0,"SetupQuantityFormula":null,"ToOperation":10,"DiscountPercentage":0,"LockedDiscount":false,"LockedUnitPrice":false,"PriceFactor":64,"PriceFormulaText":"[707435042004352992]","Quantity":1,"SelectionComment":{"$id":"33","Id":"0","Text":"","RawText":"","HasFileLinks":false,"FileLinks":null},"SelectionType":30,"UnitPrice":{"$id":"34","Amount":0,"CurrencyId":"2"},"UnitPriceInCompanyCurrency":{"$id":"35","Amount":0,"CurrencyId":"2"},"IsSelected":true,"IsAvailable":true,"ValidationResults":[],"WeightPerUnit":null,"SelectionCommentDocumentOverrides":7},{"$id":"36","AlternativePreparationCode":null,"AutoCompleteConfigurationId":null,"Comment":null,"DefaultQuantity":1,"ExtraPercent":0,"HasSelections":false,"Id":"993518285080342909","CloneId":0,"Instruction":null,"IsDefaultSettings":false,"IsForCalculationOnly":false,"MainPartId":null,"MaxQuantity":1,"MinQuantity":1,"PartId":"707435482238493977","Position":null,"QuantityFormula":null,"RowIndex":1,"SetupQuantity":0,"SetupQuantityFormula":null,"ToOperation":10,"DiscountPercentage":0,"LockedDiscount":false,"LockedUnitPrice":false,"PriceFactor":64,"PriceFormulaText":"[707435042004352992]","Quantity":1,"SelectionComment":{"$id":"37","Id":"0","Text":"","RawText":"","HasFileLinks":false,"FileLinks":null},"SelectionType":10,"UnitPrice":{"$id":"38","Amount":0,"CurrencyId":"2"},"UnitPriceInCompanyCurrency":{"$id":"39","Amount":0,"CurrencyId":"2"},"IsSelected":false,"IsAvailable":true,"ValidationResults":[],"WeightPerUnit":null,"SelectionCommentDocumentOverrides":7}],"SelectionGroups":[],"SourceVersion":7,"IsAvailable":true,"ValidationResults":[]},{"$id":"31","Id":"993518285080342999","CanEditSelectedQuantity":false,"Code":"HoleType2","Comment":null,"Description":"Hole shape 2","MaximumSelectedQuantity":null,"MaximumSelectedRows":1,"MinimumSelectedQuantity":null,"MinimumSelectedRows":1,"RowIndex":3,"Rows":[{"$id":"38","AlternativePreparationCode":null,"AutoCompleteConfigurationId":null,"Comment":null,"DefaultQuantity":1,"ExtraPercent":0,"HasSelections":false,"Id":"993518285080342998","CloneId":0,"Instruction":null,"IsDefaultSettings":false,"IsForCalculationOnly":false,"MainPartId":null,"MaxQuantity":1,"MinQuantity":1,"PartId":"707435321177219946","Position":null,"QuantityFormula":null,"RowIndex":0,"SetupQuantity":0,"SetupQuantityFormula":null,"ToOperation":10,"DiscountPercentage":0,"LockedDiscount":false,"LockedUnitPrice":false,"PriceFactor":64,"PriceFormulaText":"[707435042004352992]","Quantity":1,"SelectionComment":{"$id":"33","Id":"0","Text":"","RawText":"","HasFileLinks":false,"FileLinks":null},"SelectionType":30,"UnitPrice":{"$id":"34","Amount":0,"CurrencyId":"2"},"UnitPriceInCompanyCurrency":{"$id":"35","Amount":0,"CurrencyId":"2"},"IsSelected":true,"IsAvailable":true,"ValidationResults":[],"WeightPerUnit":null,"SelectionCommentDocumentOverrides":7},{"$id":"42","AlternativePreparationCode":null,"AutoCompleteConfigurationId":null,"Comment":null,"DefaultQuantity":1,"ExtraPercent":0,"HasSelections":false,"Id":"993518285080342999","CloneId":0,"Instruction":null,"IsDefaultSettings":false,"IsForCalculationOnly":false,"MainPartId":null,"MaxQuantity":1,"MinQuantity":1,"PartId":"707435482238493977","Position":null,"QuantityFormula":null,"RowIndex":1,"SetupQuantity":0,"SetupQuantityFormula":null,"ToOperation":10,"DiscountPercentage":0,"LockedDiscount":false,"LockedUnitPrice":false,"PriceFactor":64,"PriceFormulaText":"[707435042004352992]","Quantity":1,"SelectionComment":{"$id":"37","Id":"0","Text":"","RawText":"","HasFileLinks":false,"FileLinks":null},"SelectionType":10,"UnitPrice":{"$id":"38","Amount":0,"CurrencyId":"2"},"UnitPriceInCompanyCurrency":{"$id":"39","Amount":0,"CurrencyId":"2"},"IsSelected":false,"IsAvailable":true,"ValidationResults":[],"WeightPerUnit":null,"SelectionCommentDocumentOverrides":7}],"SelectionGroups":[],"SourceVersion":7,"IsAvailable":true,"ValidationResults":[]}],"RowIndex":0}]}""";
+
+    var sessionId = "testSessionId123";
+    var configWebState = new
+    {
+      partNumber = "ConfigurablePlate1",
+      valid = true,
+      values = new Dictionary<string, double>() { },
+      selections = new Dictionary<string, WebSelectionRowItem[]>()
+      {
+        ["HoleType1"] = [],
+      }
+    };
+    var jsonInputString = JsonSerializer.Serialize(configWebState, new
+      System.Text.Json.JsonSerializerOptions()
+    {
+      DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    });
+
+    AdapterLibrary.MonitorAPI adapter = new AdapterLibrary.MonitorAPI();
+
+    string result = adapter.webToConfigurationInstructions(jsonInputString, sessionId, PartConfigurationState_Response, All_Parts_Response);
+
+    var partExpectedState1 = new
+    {
+      SessionId = sessionId,
+      Instructions = new List<UpdatePartConfigurationInstruction>(){
+          new UpdatePartConfigurationInstruction(
+            1,
+            null,
+            new SelectionGroupRowUpdate("993518285080342908", "707435321177219946", false, null)
+          ),
+           new UpdatePartConfigurationInstruction(
+            1,
+            null,
+            new SelectionGroupRowUpdate("993518285080342909", "707435482238493977", false, null)
+          )
+        }
+
+    };
+    var expectedResult = JsonSerializer.Serialize(partExpectedState1, new
+      System.Text.Json.JsonSerializerOptions()
+    {
+      DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    });
+
+    Assert.AreEqual(result, expectedResult);
+  }
+
+  [TestMethod]
   public void TestG5ToWeb_Variable_null()
   {
 
