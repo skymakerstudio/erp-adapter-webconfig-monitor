@@ -39,6 +39,10 @@ There is also a branch with C# 6 available [net6](https://github.com/skymakerstu
 }
 ```
 
+Wireframe of corresponding fields in a configurable article in Monitor G5 (that can be filled in automatically with this adapter)
+<img width="1029" height="597" alt="Konfigurator-Wireframe---erp-adapter-example" src="https://github.com/user-attachments/assets/453491fe-6714-40c5-b986-98c0a069950d" />
+
+
 ## Example of how to transform G5 configuration to simplified web API request (pseudo code)
 
 ```C#
